@@ -59,6 +59,23 @@ Os XMLs são gravados exatamente como estão no banco do SysPDV, sem nenhuma
 alteração (a assinatura digital continua válida).
 
 
+NOTA AUTORIZADA QUE APARECE COMO "SEM AUTORIZAÇÃO"
+--------------------------------------------------
+Algumas NFC-e que estão autorizadas no SysPDV aparecem como "sem
+autorização", com o detalhe "AUTORIZADO O USO DA NF-E". Isso é um defeito
+do SysPDV, e não do NFCeHub.
+
+Acontece quando o caixa entra em contingência logo depois de a SEFAZ já
+ter autorizado a nota. O SysPDV guarda a nota de contingência, que tem
+outra chave de acesso, junto com a autorização da nota original, e o XML
+fica inválido. A nota autorizada de verdade não fica guardada no
+computador: nem no banco, nem na pasta C:\Syspdv\NFCe\Vendas.
+
+A nota está autorizada na SEFAZ, mas o programa não gera o XML dela,
+porque o contador recusaria o arquivo. Ela aparece no relatório de notas
+não exportadas. Para conseguir o XML correto, procure o suporte do SysPDV.
+
+
 ONDE O SYSPDV GUARDA OS XMLs (para suporte)
 -------------------------------------------
 Banco syspdv_srv.fdb (Firebird 2.5):
