@@ -18,7 +18,7 @@
             <StackPanel Grid.Column="0">
                 <StackPanel Orientation="Horizontal" Margin="0,16,0,10">
                     <local:IconView Data="{StaticResource IconDocument}" Size="20" />
-                    <TextBlock Text="Quais NFC-e" Style="{StaticResource SectionText}" />
+                    <TextBlock Text="Selecionar notas" Style="{StaticResource SectionText}" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
@@ -38,13 +38,13 @@
                                  FontSize="{StaticResource StrongSize}" FontWeight="SemiBold" local:Ui.Placeholder="opcional" />
                     </StackPanel>
                     <Button x:Name="AddButton" Style="{StaticResource IconButton}" VerticalAlignment="Bottom" Click="AddRangeClick"
-                            local:Ui.Icon="{StaticResource IconPlus}" ToolTip="Pôr na lista"
-                            AutomationProperties.Name="Pôr na lista" />
+                            local:Ui.Icon="{StaticResource IconPlus}" ToolTip="Adicionar à lista"
+                            AutomationProperties.Name="Adicionar à lista" />
                 </StackPanel>
 
                 <TextBlock x:Name="HintText" Style="{StaticResource SmallText}" Foreground="{DynamicResource FaintBrush}"
                            Margin="0,6,0,0"
-                           Text="Deixe o nº final em branco para uma nota só. Clique em + para pôr na lista." />
+                           Text="Deixe o nº final em branco para uma nota só. Clique em + para adicionar à lista." />
 
                 <DockPanel Margin="0,12,0,8" LastChildFill="False">
                     <Button DockPanel.Dock="Left" Content="Importar PDF" Style="{StaticResource PillButton}" Height="34"

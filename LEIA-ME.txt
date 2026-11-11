@@ -25,7 +25,7 @@ PRIMEIRO USO
 
 COMO USAR
 ---------
-1. Em "Quais NFC-e", digite a série, o nº inicial e o nº final e clique em +.
+1. Em "Selecionar notas", digite a série, o nº inicial e o nº final e clique em +.
    - Uma nota só: deixe o nº final em branco.
    - Pode adicionar várias faixas (ex.: 122 a 150 e depois 160 a 170).
 2. Ou clique em "Importar PDF" e escolha um PDF (ou TXT/CSV) com a relação
@@ -36,7 +36,7 @@ COMO USAR
      linhas de NF-e (modelo 55) são ignoradas;
    - faixas escritas, como "122 a 150" ou "Inicial 122 Final 150";
    - números soltos (usa a série digitada na tela).
-   Antes de pôr na lista, ele mostra o que encontrou para você conferir.
+   Antes de adicionar à lista, ele mostra o que encontrou para você conferir.
 3. Em "Onde salvar", escolha a pasta.
 4. Clique em "Gerar XMLs".
 
@@ -49,6 +49,8 @@ O QUE É GRAVADO
 - Sem autorização (rejeitada ou contingência não transmitida): só é gravada
   se a opção estiver marcada, na subpasta "Sem autorizacao".
 - Opção "Separar em pastas por mês": cria subpastas AAAA-MM.
+- Notas de mais de uma série: cada série vai para a sua pasta ("Série 1",
+  "Série 2", "Série 11"...). Com uma série só, os XMLs ficam direto na pasta.
 
 Se alguma nota não for encontrada ou não tiver autorização, o programa grava
 na pasta um relatório "Relatorio-NFCe-nao-exportadas-....txt" com a lista.

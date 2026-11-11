@@ -96,6 +96,8 @@ public static class XmlFiles
         ? $"{info.EventType}{info.AccessKey}{info.EventSeq:00}-procEventoNFe.xml"
         : $"{info.AccessKey}-nfe.xml";
 
+    public static string SeriesFolder(int series) => $"Série {series}";
+
     public static string MonthFolder(string accessKey)
     {
         if (accessKey.Length == 44 && accessKey.Substring(2, 4).All(char.IsDigit))

@@ -79,6 +79,13 @@ public class XmlFilesTests
     }
 
     [Fact]
+    public void SeriesFolderUsesTheSeriesNumber()
+    {
+        Assert.Equal("Série 1", XmlFiles.SeriesFolder(1));
+        Assert.Equal("Série 11", XmlFiles.SeriesFolder(11));
+    }
+
+    [Fact]
     public void WriteFileReplacesExistingFile()
     {
         var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), "a.xml");

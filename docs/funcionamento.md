@@ -63,6 +63,8 @@ Situação de cada nota:
 
 O nome do evento segue o padrão `<tpEvento><chave><nSeqEvento com 2 dígitos>-procEventoNFe.xml`. A chave é tirada do próprio XML (atributo `Id="NFe..."` ou `<chNFe>`), não da `TRANSACAO`. O XML é lido com a codificação Latin-1 só para essas buscas, o que mantém cada byte como está.
 
+Quando as faixas pedidas têm mais de uma série, cada nota vai para a pasta `Série N` da sua série (a série da faixa pedida, ex.: `Série 1`, `Série 11`). Com uma série só, não é criada pasta de série. A pasta da série fica acima das outras: `Série N/AAAA-MM/Sem autorizacao/`. O relatório de notas não exportadas continua na pasta de destino.
+
 Com a opção "Separar em pastas por mês", a pasta `AAAA-MM` vem das posições 3 a 6 da chave de acesso (AAMM da emissão), para a nota e o evento de cancelamento ficarem juntos.
 
 O XML é gravado exatamente como está no banco, só descompactado: qualquer alteração invalidaria a assinatura digital. A gravação é feita num arquivo `.tmp` que depois substitui o definitivo com `MoveFileEx` (`MOVEFILE_REPLACE_EXISTING`), a mesma chamada que o Python usa. O `File.Move` do .NET Framework, com a checagem de arquivo existente antes, deixava a gravação de 4.000 arquivos três vezes mais lenta.
@@ -136,7 +138,7 @@ A chave `fbclient` da versão Python não é mais usada e é retirada quando o a
 - Só uma instância do programa por sessão do Windows (mutex `Local\NFCeHub`). Ao abrir de novo, a janela já aberta vem para a frente: ela é achada pelo título `NFCeHub` (`App.Title`), que tem de ser igual ao `Title` da `MainWindow.xaml`.
 - Log de erros em `%LOCALAPPDATA%\NFCeHub\nfcehub.log` (até 1 MB, 2 cópias antigas). Erros não tratados na janela vão para o log e aparecem numa mensagem, sem fechar o programa.
 - Caixas de mensagem: o programa não usa a caixa padrão do Windows. `MessageDialog` é uma janela própria no tema (claro/escuro), com um selo redondo colorido conforme o tipo (pergunta e informação em azul, sucesso em verde, aviso em amarelo, erro em vermelho), título, subtítulo, uma faixa em degradê e os botões em pílula. Enter aciona o botão principal e Esc fecha (equivale a cancelar). Avisos tocam o som de exclamação do Windows e erros, o som de erro. `Dialogs.cs` monta o conteúdo de cada caso:
-  - Importar PDF: destaques com o total de NFC-e, de faixas e de séries; tabela por série (intervalo de números e quantidade); as 12 primeiras faixas em etiquetas (com a série na frente quando há mais de uma); avisos de NF-e ignoradas e de leitura. Botões "Cancelar" e "Pôr na lista".
+  - Importar PDF: destaques com o total de NFC-e, de faixas e de séries; tabela por série (intervalo de números e quantidade); as 12 primeiras faixas em etiquetas (com a série na frente quando há mais de uma); avisos de NF-e ignoradas e de leitura. Botões "Cancelar" e "Adicionar à lista".
   - Arquivo sem NFC-e: explica os formatos aceitos e mostra os avisos da leitura.
   - Fim da exportação: um destaque colorido por situação que apareceu (autorizadas em verde, canceladas em azul, sem autorização em amarelo, não encontradas e com erro em vermelho), a pasta de destino e o nome do relatório, quando houver. O selo é verde se tudo foi exportado e amarelo se houve problema ou interrupção. Botões "Fechar" e "Abrir pasta".
   - Erro inesperado: mensagem de erro no mesmo visual. Se a própria caixa falhar, cai na caixa padrão do Windows.

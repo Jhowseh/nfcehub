@@ -36,6 +36,7 @@ public static class Exporter
         progress?.Invoke(0, total, "Procurando as notas no banco…");
         var found = SysPdv.FindRecords(db, ranges);
         using var xmlQuery = SysPdv.PrepareXmlQuery(db);
+        var bySeries = ranges.Select(r => r.Series).Distinct().Count() > 1;
 
         var results = new List<NoteResult>();
         var done = 0;
@@ -51,7 +52,8 @@ public static class Exporter
                 try
                 {
                     var records = found.TryGetValue((range.Series, number), out var list) ? list : new List<XmlRecord>();
-                    ExportNote(xmlQuery, records, result, output, options);
+                    var folder = bySeries ? Path.Combine(output, XmlFiles.SeriesFolder(range.Series)) : output;
+                    ExportNote(xmlQuery, records, result, folder, options);
                 }
                 catch (Exception e)
                 {

@@ -57,7 +57,7 @@ public static class Dialogs
 
         return MessageDialog.Show(owner, DialogKind.Question, "Importar estas notas?", fileName, body,
             new DialogButton("Cancelar", false),
-            new DialogButton("Pôr na lista", true, primary: true, icon: "Plus"));
+            new DialogButton("Adicionar à lista", true, primary: true, icon: "Plus"));
     }
 
     public static void NothingFound(Window owner, string fileName, Reading reading)
