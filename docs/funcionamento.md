@@ -185,7 +185,7 @@ A chave `fbclient` da versão Python não é mais usada e é retirada quando o a
 ## Janela (`MainWindow`, `SettingsWindow`, `Header`)
 
 - A janela tem duas colunas para caber em telas de 768 px de altura: à esquerda as notas (campos, importar PDF e lista de faixas), à direita a pasta, as opções e o progresso.
-- Ao abrir, busca a última NFC-e emitida nos últimos 120 dias (usa o índice de `TRNDAT`) para mostrar como dica.
+- Ao abrir, busca a última NFC-e emitida nos últimos 120 dias (usa o índice de `TRNDAT`) e mostra só no texto que aparece ao passar o mouse na bolinha de status do cabeçalho.
 - Acesso ao banco e leitura de PDF rodam em segundo plano (`Task.Run`), para a janela não travar. O progresso da exportação é lido pela janela a cada 80 ms.
 - Enter num dos campos de número põe a faixa na lista. Os botões só com ícone (`+`, pasta, `×`) têm nome de acessibilidade, para leitores de tela.
 - A pasta é escolhida com a janela moderna do Windows (`IFileOpenDialog` com `FOS_PICKFOLDERS`), em vez da janela em árvore antiga do .NET Framework.
@@ -197,7 +197,7 @@ A chave `fbclient` da versão Python não é mais usada e é retirada quando o a
   - Arquivo sem NFC-e: explica os formatos aceitos e mostra os avisos da leitura.
   - Fim da exportação: um destaque colorido por situação que apareceu (autorizadas em verde, canceladas em azul, sem autorização em amarelo, não encontradas e com erro em vermelho), a pasta de destino e o nome do relatório, quando houver. O selo é verde se tudo foi exportado e amarelo se houve problema ou interrupção. Botões "Fechar" e "Abrir pasta".
   - Erro inesperado: mensagem de erro no mesmo visual. Se a própria caixa falhar, cai na caixa padrão do Windows.
-- Tela de configuração: janela independente (com botão próprio na barra de tarefas), sem bloquear a principal. Só uma aberta por vez. "Testar conexão" só abre a conexão e faz `SELECT 1 FROM RDB$DATABASE`, mostrando "Conectou!". Não conta os registros da `TRANSACAO_XMLNOTA`: o Firebird não guarda o total de linhas, então o `COUNT(*)` lê a tabela inteira e, num banco de 3 GB, levava cerca de 3 minutos. Os campos vêm do `config.ini`, completados com os valores do registro do SysPDV. Enter salva e Esc fecha.
+- Tela de configuração: janela independente (com botão próprio na barra de tarefas), sem bloquear a principal. Só uma aberta por vez. "Testar conexão" só abre a conexão e faz `SELECT 1 FROM RDB$DATABASE`, mostrando "Conectado!". Não conta os registros da `TRANSACAO_XMLNOTA`: o Firebird não guarda o total de linhas, então o `COUNT(*)` lê a tabela inteira e, num banco de 3 GB, levava cerca de 3 minutos. Os campos vêm do `config.ini`, completados com os valores do registro do SysPDV. Enter salva e Esc fecha.
 
 ### Tema visual (`Theme.cs`, `Themes/`)
 

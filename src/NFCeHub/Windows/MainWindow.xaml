@@ -42,7 +42,7 @@
                             AutomationProperties.Name="Adicionar à lista" />
                 </StackPanel>
 
-                <TextBlock x:Name="HintText" Style="{StaticResource SmallText}" Foreground="{DynamicResource FaintBrush}"
+                <TextBlock Style="{StaticResource SmallText}" Foreground="{DynamicResource FaintBrush}"
                            Margin="0,6,0,0"
                            Text="Deixe o nº final em branco para uma nota só. Clique em + para adicionar à lista." />
 

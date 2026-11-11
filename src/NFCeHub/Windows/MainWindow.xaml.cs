@@ -103,9 +103,9 @@ public partial class MainWindow : Window
             if (last != null)
             {
                 var date = last.Date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-                var text = $"Última NFC-e no banco: série {last.Series}, nº {last.Number} ({date}).";
-                HintText.Text = text + " Nº final em branco = uma nota só.";
-                HeaderBar.SetStatus($"Conectado ao SysPDV · {text}", StatusKind.Ok);
+                HeaderBar.SetStatus(
+                    $"Conectado ao SysPDV · Última NFC-e no banco: série {last.Series}, nº {last.Number} ({date}).",
+                    StatusKind.Ok);
             }
             else
             {

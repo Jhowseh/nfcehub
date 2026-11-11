@@ -96,7 +96,7 @@ public partial class SettingsWindow : Window
                 using var db = Database.Open(settings);
                 SysPdv.Ping(db);
             });
-            Notice("Conectou!", "Green");
+            Notice("Conectado!", "Green");
         }
         catch (Exception error)
         {
