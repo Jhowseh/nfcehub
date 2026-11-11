@@ -2,6 +2,10 @@
 
 Aplicativo desktop para Windows que exporta os arquivos XML das NFC-e diretamente do banco de dados do SysPDV, para envio à contabilidade ou arquivamento.
 
+<p align="center">
+  <img src="docs/img/main.png" width="860" alt="Janela principal do NFCeHub com três faixas de notas na lista">
+</p>
+
 - Manual do usuário: [LEIA-ME.txt](LEIA-ME.txt) e o manual em PDF, gerado em `dist/Manual-NFCeHub.pdf` (ver [Manual em PDF](#manual-em-pdf))
 - Documentação técnica: [docs/funcionamento.md](docs/funcionamento.md) e [docs/manual.md](docs/manual.md)
 
@@ -17,6 +21,19 @@ O NFCeHub resolve isso em uma única tela:
 - **Mais rápido:** os XMLs são lidos direto do banco de dados, sem passar pelas telas do SysPDV.
 
 Basta informar as notas, escolher a pasta de destino e clicar em **Gerar XMLs**.
+
+<table>
+  <tr>
+    <td width="50%" valign="top" align="center">
+      <img src="docs/img/import.png" alt="Conferência das notas importadas de um PDF"><br>
+      <sub>Conferência das notas lidas de um PDF</sub>
+    </td>
+    <td width="50%" valign="top" align="center">
+      <img src="docs/img/export.png" alt="Resumo do fim da exportação"><br>
+      <sub>Resumo do fim da exportação</sub>
+    </td>
+  </tr>
+</table>
 
 O acesso ao banco é exclusivamente de leitura: a conexão é aberta em uma transação somente leitura e nenhum dado é gravado.
 
@@ -68,6 +85,7 @@ NFCeHub/
 ├── tests/
 │   └── NFCeHub.Core.Tests/          testes automáticos do núcleo (xUnit)
 ├── docs/                            documentação técnica
+│   └── img/                         imagens das telas usadas neste README (geradas com o manual)
 ├── manual/                          manual do usuário em PDF
 │   ├── Screens/                     gera as imagens das telas → nfcehub-screens.exe
 │   ├── img/                         imagens das telas, ícones e logo (geradas, fora do Git)
@@ -113,7 +131,7 @@ pip install -r manual/requirements.txt
 powershell -ExecutionPolicy Bypass -File manual/build-manual.ps1
 ```
 
-O script compila o `nfcehub-screens.exe`, que gera as imagens das telas com dados fictícios em `manual/img/`, e depois roda o `build_manual.py`, que monta o PDF. `-SkipScreens` reaproveita as imagens já geradas; como `manual/img/` fica fora do Git, num clone novo rode o script completo uma vez antes. A versão impressa no manual vem do `Directory.Build.props`. Ao mudar uma tela ou o comportamento do programa, gere o manual de novo e revise o texto em `manual/build_manual.py`. Detalhes em [docs/manual.md](docs/manual.md).
+O script compila o `nfcehub-screens.exe`, que gera as imagens das telas com dados fictícios em `manual/img/`, e depois roda o `build_manual.py`, que monta o PDF. `-SkipScreens` reaproveita as imagens já geradas; como `manual/img/` fica fora do Git, num clone novo rode o script completo uma vez antes. A versão impressa no manual vem do `Directory.Build.props`. O mesmo script atualiza as imagens deste README em `docs/img/`, que ficam no Git. Ao mudar uma tela ou o comportamento do programa, gere o manual de novo, revise o texto em `manual/build_manual.py` e versione as imagens novas de `docs/img/`. Detalhes em [docs/manual.md](docs/manual.md).
 
 ## Testes
 

@@ -13,6 +13,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 IMG = HERE / "img"
 TMP = IMG / "generated"
+README_IMG = ROOT / "docs" / "img"
 OUTPUT = ROOT / "dist" / "Manual-NFCeHub.pdf"
 FONTS = Path(r"C:\Windows\Fonts")
 
@@ -39,6 +40,9 @@ def prepare_images():
     annotate(IMG / "settings.png", markers["settings"], TMP / "settings.png")
     frame(IMG / "import.png", TMP / "import.png")
     frame(IMG / "export.png", TMP / "export.png")
+    README_IMG.mkdir(parents=True, exist_ok=True)
+    for name in ("main", "import", "export"):
+        frame(IMG / f"{name}.png", README_IMG / f"{name}.png")
 
 
 def frame(source, target, radius=26):

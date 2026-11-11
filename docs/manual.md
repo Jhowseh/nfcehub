@@ -31,6 +31,7 @@ Como funciona:
 Usa `fpdf2` e `Pillow`, com as fontes Segoe UI e Consolas do Windows.
 
 - Recorta as capturas com cantos arredondados e borda e desenha os marcadores numerados (círculos violeta), numa margem acrescentada dos dois lados da imagem. As imagens prontas ficam em `manual/img/generated/`.
+- Grava também `main.png`, `import.png` e `export.png` em `docs/img/`, só com o recorte e a borda (sem marcadores), para o `README.md`. Os cantos ficam transparentes, então a imagem fica boa no tema claro e no escuro do GitHub. Ao contrário de `manual/img/`, a pasta `docs/img/` fica no Git: depois de gerar o manual com uma tela alterada, versione as imagens novas.
 - A versão vem da tag `<Version>` do `Directory.Build.props`, sem o último número quando ele é zero (`1.0.0` aparece como "1.0"). O mês da capa é o da data de geração.
 - O texto do manual está nas funções `page_*` do script. Empresa, telefone e créditos ficam nas constantes do início.
 - As seções começam numa página nova, menos "Bom saber" (nota autorizada que aparece como "sem autorização"), que continua na página do Passo 6. Ao mudar o texto, confira se nenhuma página ficou só com um pedaço da anterior.
