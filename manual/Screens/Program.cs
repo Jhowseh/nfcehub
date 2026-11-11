@@ -20,12 +20,6 @@ public static class Program
     private const BindingFlags Hidden = BindingFlags.NonPublic | BindingFlags.Instance;
     private const string SampleFolder = @"C:\XML-Contabilidade\Outubro-2026";
 
-    private static readonly Dictionary<string, string> ExtraIcons = new()
-    {
-        ["User"] = "M19,21 V19 A4,4 0 0 0 15,15 H9 A4,4 0 0 0 5,19 V21 M12,11 A4,4 0 1 0 12,3 A4,4 0 1 0 12,11 Z",
-        ["Phone"] = "M7,2 H17 A2,2 0 0 1 19,4 V20 A2,2 0 0 1 17,22 H7 A2,2 0 0 1 5,20 V4 A2,2 0 0 1 7,2 Z M12,18 L12,18.01",
-    };
-
     private static readonly Dictionary<string, string> Markers = new();
     private static string output;
     private static string dialogName;
@@ -156,6 +150,7 @@ public static class Program
             (Field<Button>(window, "ExportButton"), "right", "r"),
             (ButtonByText(host, "Abrir pasta"), "left", "l"),
             (ButtonByText(host, "Configurações"), "right", "r"),
+            (ButtonByText(host, "Sobre"), "right", "r"),
         };
         Save(host, "main.png", points);
         window.Close();
@@ -324,8 +319,7 @@ public static class Program
         var icons = Application.Current.Resources.MergedDictionaries
             .SelectMany(d => d.Keys.OfType<string>()
                 .Where(k => k.StartsWith("Icon", StringComparison.Ordinal) && d[k] is Geometry)
-                .Select(k => (Name: k.Substring(4), Geometry: (Geometry)d[k])))
-            .Concat(ExtraIcons.Select(p => (Name: p.Key, Geometry: Geometry.Parse(p.Value))));
+                .Select(k => (Name: k.Substring(4), Geometry: (Geometry)d[k])));
         foreach (var (iconName, geometry) in icons)
         {
             SaveIcon(geometry, $"ic_{iconName.ToLowerInvariant()}.png", Theme.Violet);

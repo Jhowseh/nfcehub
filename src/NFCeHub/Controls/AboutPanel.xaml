@@ -1,0 +1,69 @@
+<UserControl x:Class="NFCeHub.AboutPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:NFCeHub">
+    <UserControl.Resources>
+        <Style x:Key="InfoCard" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="20,16,20,14" />
+        </Style>
+    </UserControl.Resources>
+    <StackPanel>
+        <DockPanel Margin="0,16,0,0" LastChildFill="False">
+            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                <local:IconView Data="{StaticResource IconAbout}" Size="20" />
+                <TextBlock Text="Sobre o NFCeHub" Style="{StaticResource SectionText}" />
+            </StackPanel>
+            <Button x:Name="BackButton" DockPanel.Dock="Right" Content="Voltar" Style="{StaticResource PillButton}" Height="34"
+                    Click="BackClick" />
+        </DockPanel>
+
+        <StackPanel x:Name="VersionLabel" Orientation="Horizontal" Margin="0,4,0,14" />
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="440" />
+                <ColumnDefinition Width="32" />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource InfoCard}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <local:IconView Data="{StaticResource IconLayers}" Size="18" VerticalAlignment="Center" />
+                        <TextBlock x:Name="CompanyText" Style="{StaticResource TextBase}" FontSize="{StaticResource StrongSize}"
+                                   FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                        <local:IconView Data="{StaticResource IconPhone}" Size="18" VerticalAlignment="Center" />
+                        <TextBlock x:Name="PhoneText" Style="{StaticResource TextBase}" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </StackPanel>
+                    <Border Height="1" Background="{DynamicResource LineBrush}" Margin="0,16,0,14" />
+                    <TextBlock Style="{StaticResource SmallText}" FontSize="{StaticResource BodySize}"
+                               Text="Gera os arquivos XML das NFC-e direto do banco do SysPDV. Só lê o banco: nunca altera, transmite ou apaga nada." />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource InfoCard}">
+                <StackPanel>
+                    <TextBlock Text="DESENVOLVIMENTO E ANÁLISE" Style="{StaticResource TextBase}" FontFamily="{StaticResource MonoFont}"
+                               FontSize="{StaticResource LabelSize}" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,4" />
+                    <ItemsControl x:Name="DeveloperList" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
+                                    <local:IconView Data="{StaticResource IconUser}" Size="18" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding}" Style="{StaticResource TextBase}" VerticalAlignment="Center"
+                                               Margin="10,0,0,0" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </StackPanel>
+</UserControl>

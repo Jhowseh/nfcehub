@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using NFCeHub.Core;
 using Microsoft.Win32;
@@ -32,11 +34,13 @@ public sealed class RangeItem
 public partial class MainWindow : Window
 {
     private const long MaxNotes = 200_000;
+    private static readonly TimeSpan SlideTime = TimeSpan.FromMilliseconds(240);
 
     private readonly object progressGate = new();
     private readonly DispatcherTimer progressTimer;
     private List<NoteRange> ranges = new();
     private bool busy;
+    private bool sliding;
     private CancellationTokenSource stop;
     private (int Done, long Total, string Text) progress;
 
@@ -69,7 +73,8 @@ public partial class MainWindow : Window
             (_, _) => TrackProgress(), Dispatcher);
         progressTimer.Stop();
         RefreshRanges();
-        Loaded += (_, _) => Dispatcher.BeginInvoke(new Action(Start), DispatcherPriority.ApplicationIdle);
+        PreviewKeyDown += OnWindowKey;
+        Loaded +=(_, _) => Dispatcher.BeginInvoke(new Action(Start), DispatcherPriority.ApplicationIdle);
     }
 
     private static string Plural(long n, string one, string many) => Format.Plural(n, one, many);
@@ -305,6 +310,80 @@ public partial class MainWindow : Window
     }
 
     private void SettingsClick(object sender, RoutedEventArgs e) => OpenSettings();
+
+    private void AboutClick(object sender, RoutedEventArgs e)
+    {
+        if (AboutView.Visibility == Visibility.Visible)
+        {
+            CloseAbout();
+        }
+        else
+        {
+            OpenAbout();
+        }
+    }
+
+    private void AboutBack(object sender, EventArgs e) => CloseAbout();
+
+    private void OpenAbout()
+    {
+        if (sliding || AboutView.Visibility == Visibility.Visible)
+        {
+            return;
+        }
+        Slide(MainContent, AboutView, 1, () =>
+        {
+            MainContent.Visibility = Visibility.Hidden;
+            AboutView.FocusBack();
+        });
+    }
+
+    private void CloseAbout()
+    {
+        if (sliding || AboutView.Visibility != Visibility.Visible)
+        {
+            return;
+        }
+        MainContent.Visibility = Visibility.Visible;
+        Slide(AboutView, MainContent, -1, () =>
+        {
+            AboutView.Visibility = Visibility.Collapsed;
+            StartField.Focus();
+        });
+    }
+
+    private void Slide(FrameworkElement leaving, FrameworkElement entering, int direction, Action finished)
+    {
+        sliding = true;
+        var width = Stage.ActualWidth;
+        entering.Visibility = Visibility.Visible;
+        var leavingMove = new TranslateTransform();
+        var enteringMove = new TranslateTransform(direction * width, 0);
+        leaving.RenderTransform = leavingMove;
+        entering.RenderTransform = enteringMove;
+        var time = new Duration(SystemParameters.ClientAreaAnimation ? SlideTime : TimeSpan.Zero);
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        var exit = new DoubleAnimation(0, -direction * width, time) { EasingFunction = ease };
+        var enter = new DoubleAnimation(direction * width, 0, time) { EasingFunction = ease };
+        enter.Completed += (_, _) =>
+        {
+            leaving.RenderTransform = null;
+            entering.RenderTransform = null;
+            sliding = false;
+            finished();
+        };
+        leavingMove.BeginAnimation(TranslateTransform.XProperty, exit);
+        enteringMove.BeginAnimation(TranslateTransform.XProperty, enter);
+    }
+
+    private void OnWindowKey(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && AboutView.Visibility == Visibility.Visible)
+        {
+            CloseAbout();
+            e.Handled = true;
+        }
+    }
 
     private ExportOptions Options() => new()
     {

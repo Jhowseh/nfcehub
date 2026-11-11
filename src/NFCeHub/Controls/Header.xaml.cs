@@ -31,21 +31,27 @@ public partial class Header : UserControl
         Root.Height = withStatus ? 122 : 104;
         LogoImage.Height = withStatus ? 96 : 84;
         LogoImage.Source = Logo.Load(Theme.IsDark);
-        foreach (var ch in eyebrow.ToUpperInvariant())
-        {
-            Eyebrow.Children.Add(new TextBlock
-            {
-                Text = ch.ToString(),
-                FontFamily = (FontFamily)FindResource("MonoFont"),
-                FontSize = (double)FindResource("LabelSize"),
-                Foreground = Theme.Resource("Muted"),
-                Margin = new Thickness(0, 0, 2.5, 0),
-            });
-        }
+        AddSpaced(Eyebrow, eyebrow);
         TitleText.Text = title;
         SubtitleText.Text = subtitle;
         Status.Visibility = withStatus ? Visibility.Visible : Visibility.Collapsed;
         SetStatus("", StatusKind.Ok);
+    }
+
+    public static void AddSpaced(Panel panel, string text)
+    {
+        var resources = Application.Current.Resources;
+        foreach (var ch in text.ToUpperInvariant())
+        {
+            panel.Children.Add(new TextBlock
+            {
+                Text = ch.ToString(),
+                FontFamily = (FontFamily)resources["MonoFont"],
+                FontSize = (double)resources["LabelSize"],
+                Foreground = Theme.Resource("Muted"),
+                Margin = new Thickness(0, 0, 2.5, 0),
+            });
+        }
     }
 
     public void SetStatus(string text, StatusKind kind)

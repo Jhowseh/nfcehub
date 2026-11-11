@@ -12,5 +12,8 @@
     <Geometry x:Key="IconQuestion">M8,8.5 A4,4 0 0 1 16,9 C16,11.8 12,12.3 12,15.2 M12,19.5 L12,19.51</Geometry>
     <Geometry x:Key="IconInfo">M12,10.5 V18.5 M12,5.5 L12,5.51</Geometry>
     <Geometry x:Key="IconAlert">M12,4.5 V13.5 M12,19 L12,19.01</Geometry>
+    <Geometry x:Key="IconAbout">M12,2 A10,10 0 1 0 12,22 A10,10 0 1 0 12,2 Z M12,16 V11.5 M12,7.5 L12,7.51</Geometry>
+    <Geometry x:Key="IconUser">M19,21 V19 A4,4 0 0 0 15,15 H9 A4,4 0 0 0 5,19 V21 M12,11 A4,4 0 1 0 12,3 A4,4 0 1 0 12,11 Z</Geometry>
+    <Geometry x:Key="IconPhone">M7,2 H17 A2,2 0 0 1 19,4 V20 A2,2 0 0 1 17,22 H7 A2,2 0 0 1 5,20 V4 A2,2 0 0 1 7,2 Z M12,18 L12,18.01</Geometry>
     <Geometry x:Key="IconCheck">M5,12.5 L10,17.5 L19,7</Geometry>
 </ResourceDictionary>

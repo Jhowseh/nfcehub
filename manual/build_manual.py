@@ -465,6 +465,7 @@ def page_main(pdf):
         "**Gerar XMLs**: começa a exportação.",
         "**Abrir pasta**: abre a pasta de destino no Explorador de Arquivos.",
         "**Configurações**: muda servidor, usuário ou senha do banco.",
+        "**Sobre**: versão do programa e contato da PBtec.",
     ])
 
 

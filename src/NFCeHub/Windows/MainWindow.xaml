@@ -8,115 +8,118 @@
     <StackPanel Margin="28,22,28,24">
         <local:Header x:Name="HeaderBar" />
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="440" />
-                <ColumnDefinition Width="32" />
-                <ColumnDefinition Width="340" />
-            </Grid.ColumnDefinitions>
+        <Grid x:Name="Stage" ClipToBounds="True">
+            <Grid x:Name="MainContent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="440" />
+                    <ColumnDefinition Width="32" />
+                    <ColumnDefinition Width="340" />
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0">
-                <StackPanel Orientation="Horizontal" Margin="0,16,0,10">
-                    <local:IconView Data="{StaticResource IconDocument}" Size="20" />
-                    <TextBlock Text="Selecionar notas" Style="{StaticResource SectionText}" />
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal">
-                    <StackPanel Width="80" Margin="0,0,12,0">
-                        <TextBlock Text="Série" Style="{StaticResource FieldLabel}" />
-                        <TextBox x:Name="SeriesField" Style="{StaticResource FieldBox}" TextAlignment="Center"
-                                 FontSize="{StaticResource StrongSize}" FontWeight="SemiBold" />
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,10">
+                        <local:IconView Data="{StaticResource IconDocument}" Size="20" />
+                        <TextBlock Text="Selecionar notas" Style="{StaticResource SectionText}" />
                     </StackPanel>
-                    <StackPanel Width="130" Margin="0,0,12,0">
-                        <TextBlock Text="Nº inicial" Style="{StaticResource FieldLabel}" />
-                        <TextBox x:Name="StartField" Style="{StaticResource FieldBox}" TextAlignment="Center"
-                                 FontSize="{StaticResource StrongSize}" FontWeight="SemiBold" local:Ui.Placeholder="ex.: 122" />
-                    </StackPanel>
-                    <StackPanel Width="130" Margin="0,0,12,0">
-                        <TextBlock Text="Nº final" Style="{StaticResource FieldLabel}" />
-                        <TextBox x:Name="EndField" Style="{StaticResource FieldBox}" TextAlignment="Center"
-                                 FontSize="{StaticResource StrongSize}" FontWeight="SemiBold" local:Ui.Placeholder="opcional" />
-                    </StackPanel>
-                    <Button x:Name="AddButton" Style="{StaticResource IconButton}" VerticalAlignment="Bottom" Click="AddRangeClick"
-                            local:Ui.Icon="{StaticResource IconPlus}" ToolTip="Adicionar à lista"
-                            AutomationProperties.Name="Adicionar à lista" />
-                </StackPanel>
 
-                <TextBlock Style="{StaticResource SmallText}" Foreground="{DynamicResource FaintBrush}"
-                           Margin="0,6,0,0"
-                           Text="Deixe o nº final em branco para uma nota só. Clique em + para adicionar à lista." />
-
-                <DockPanel Margin="0,12,0,8" LastChildFill="False">
-                    <Button DockPanel.Dock="Left" Content="Importar PDF" Style="{StaticResource PillButton}" Height="34"
-                            local:Ui.Icon="{StaticResource IconDocument}" Click="ImportClick" />
-                    <Button x:Name="ClearButton" DockPanel.Dock="Right" Content="Limpar lista"
-                            Style="{StaticResource PillButton}" Height="34" Click="ClearClick" />
-                </DockPanel>
-
-                <Grid Height="165">
-                    <Border x:Name="EmptyState" CornerRadius="12" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <local:IconView Data="{StaticResource IconLayers}" Size="24" Foreground="{DynamicResource FaintBrush}"
-                                            HorizontalAlignment="Center" />
-                            <TextBlock Style="{StaticResource SmallText}" TextAlignment="Center" Margin="0,10,0,0"
-                                       Text="Nenhuma nota na lista.&#x0a;Digite a série e os números acima ou importe um PDF." />
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Width="80" Margin="0,0,12,0">
+                            <TextBlock Text="Série" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="SeriesField" Style="{StaticResource FieldBox}" TextAlignment="Center"
+                                     FontSize="{StaticResource StrongSize}" FontWeight="SemiBold" />
                         </StackPanel>
-                    </Border>
-                    <ScrollViewer x:Name="ListScroll" VerticalScrollBarVisibility="Hidden" Focusable="False">
-                        <ItemsControl x:Name="RangeItems">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource CardBorder}">
-                                        <DockPanel Margin="14,0,8,0">
-                                            <local:IconView DockPanel.Dock="Left" Data="{StaticResource IconDocument}" Size="16"
-                                                            VerticalAlignment="Center" />
-                                            <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Padding="6"
-                                                    VerticalAlignment="Center" local:Ui.Icon="{StaticResource IconClose}"
-                                                    Tag="{Binding}" Click="RemoveRangeClick" ToolTip="Tirar da lista"
-                                                    AutomationProperties.Name="Tirar da lista" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding CountText}" Style="{StaticResource SmallText}"
-                                                       VerticalAlignment="Center" Margin="0,0,8,0" />
-                                            <TextBlock Text="{Binding LabelText}" Style="{StaticResource TextBase}"
-                                                       FontSize="{StaticResource StrongSize}" FontWeight="SemiBold"
-                                                       VerticalAlignment="Center" Margin="10,0,0,0" />
-                                        </DockPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
+                        <StackPanel Width="130" Margin="0,0,12,0">
+                            <TextBlock Text="Nº inicial" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="StartField" Style="{StaticResource FieldBox}" TextAlignment="Center"
+                                     FontSize="{StaticResource StrongSize}" FontWeight="SemiBold" local:Ui.Placeholder="ex.: 122" />
+                        </StackPanel>
+                        <StackPanel Width="130" Margin="0,0,12,0">
+                            <TextBlock Text="Nº final" Style="{StaticResource FieldLabel}" />
+                            <TextBox x:Name="EndField" Style="{StaticResource FieldBox}" TextAlignment="Center"
+                                     FontSize="{StaticResource StrongSize}" FontWeight="SemiBold" local:Ui.Placeholder="opcional" />
+                        </StackPanel>
+                        <Button x:Name="AddButton" Style="{StaticResource IconButton}" VerticalAlignment="Bottom" Click="AddRangeClick"
+                                local:Ui.Icon="{StaticResource IconPlus}" ToolTip="Adicionar à lista"
+                                AutomationProperties.Name="Adicionar à lista" />
+                    </StackPanel>
 
-                <TextBlock x:Name="TotalText" Style="{StaticResource SmallText}" Margin="0,6,0,0" />
-            </StackPanel>
+                    <TextBlock Style="{StaticResource SmallText}" Foreground="{DynamicResource FaintBrush}"
+                               Margin="0,6,0,0"
+                               Text="Deixe o nº final em branco para uma nota só. Clique em + para adicionar à lista." />
 
-            <StackPanel Grid.Column="2">
-                <StackPanel Orientation="Horizontal" Margin="0,16,0,10">
-                    <local:IconView Data="{StaticResource IconFolder}" Size="20" />
-                    <TextBlock Text="Onde salvar" Style="{StaticResource SectionText}" />
+                    <DockPanel Margin="0,12,0,8" LastChildFill="False">
+                        <Button DockPanel.Dock="Left" Content="Importar PDF" Style="{StaticResource PillButton}" Height="34"
+                                local:Ui.Icon="{StaticResource IconDocument}" Click="ImportClick" />
+                        <Button x:Name="ClearButton" DockPanel.Dock="Right" Content="Limpar lista"
+                                Style="{StaticResource PillButton}" Height="34" Click="ClearClick" />
+                    </DockPanel>
+
+                    <Grid Height="165">
+                        <Border x:Name="EmptyState" CornerRadius="12" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <local:IconView Data="{StaticResource IconLayers}" Size="24" Foreground="{DynamicResource FaintBrush}"
+                                                HorizontalAlignment="Center" />
+                                <TextBlock Style="{StaticResource SmallText}" TextAlignment="Center" Margin="0,10,0,0"
+                                           Text="Nenhuma nota na lista.&#x0a;Digite a série e os números acima ou importe um PDF." />
+                            </StackPanel>
+                        </Border>
+                        <ScrollViewer x:Name="ListScroll" VerticalScrollBarVisibility="Hidden" Focusable="False">
+                            <ItemsControl x:Name="RangeItems">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource CardBorder}">
+                                            <DockPanel Margin="14,0,8,0">
+                                                <local:IconView DockPanel.Dock="Left" Data="{StaticResource IconDocument}" Size="16"
+                                                                VerticalAlignment="Center" />
+                                                <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Padding="6"
+                                                        VerticalAlignment="Center" local:Ui.Icon="{StaticResource IconClose}"
+                                                        Tag="{Binding}" Click="RemoveRangeClick" ToolTip="Tirar da lista"
+                                                        AutomationProperties.Name="Tirar da lista" />
+                                                <TextBlock DockPanel.Dock="Right" Text="{Binding CountText}" Style="{StaticResource SmallText}"
+                                                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                <TextBlock Text="{Binding LabelText}" Style="{StaticResource TextBase}"
+                                                           FontSize="{StaticResource StrongSize}" FontWeight="SemiBold"
+                                                           VerticalAlignment="Center" Margin="10,0,0,0" />
+                                            </DockPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <TextBlock x:Name="TotalText" Style="{StaticResource SmallText}" Margin="0,6,0,0" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBox x:Name="FolderField" Style="{StaticResource FieldBox}" Width="286"
-                             local:Ui.Placeholder="Escolha a pasta…" />
-                    <Button Style="{StaticResource IconButton}" Margin="12,0,0,0" Click="ChooseFolderClick"
-                            local:Ui.Icon="{StaticResource IconFolder}" ToolTip="Escolher pasta"
-                            AutomationProperties.Name="Escolher pasta" />
-                </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="0,20,0,6">
-                    <local:IconView Data="{StaticResource IconSliders}" Size="20" />
-                    <TextBlock Text="Opções" Style="{StaticResource SectionText}" />
-                </StackPanel>
-                <CheckBox x:Name="IncludeCancellation" Style="{StaticResource OptionBox}"
-                          Content="Incluir XML do cancelamento (canceladas)" />
-                <CheckBox x:Name="ByMonth" Style="{StaticResource OptionBox}"
-                          Content="Separar em pastas por mês (AAAA-MM)" />
-                <CheckBox x:Name="IncludeUnauthorized" Style="{StaticResource OptionBox}"
-                          Content="Incluir notas sem autorização (rejeitadas)" />
+                <StackPanel Grid.Column="2">
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,10">
+                        <local:IconView Data="{StaticResource IconFolder}" Size="20" />
+                        <TextBlock Text="Onde salvar" Style="{StaticResource SectionText}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox x:Name="FolderField" Style="{StaticResource FieldBox}" Width="286"
+                                 local:Ui.Placeholder="Escolha a pasta…" />
+                        <Button Style="{StaticResource IconButton}" Margin="12,0,0,0" Click="ChooseFolderClick"
+                                local:Ui.Icon="{StaticResource IconFolder}" ToolTip="Escolher pasta"
+                                AutomationProperties.Name="Escolher pasta" />
+                    </StackPanel>
 
-                <ProgressBar x:Name="Progress" Style="{StaticResource GradientProgress}" Margin="0,20,0,0" />
-                <TextBlock x:Name="MessageText" Style="{StaticResource SmallText}" Margin="0,8,0,0" />
-            </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,20,0,6">
+                        <local:IconView Data="{StaticResource IconSliders}" Size="20" />
+                        <TextBlock Text="Opções" Style="{StaticResource SectionText}" />
+                    </StackPanel>
+                    <CheckBox x:Name="IncludeCancellation" Style="{StaticResource OptionBox}"
+                              Content="Incluir XML do cancelamento (canceladas)" />
+                    <CheckBox x:Name="ByMonth" Style="{StaticResource OptionBox}"
+                              Content="Separar em pastas por mês (AAAA-MM)" />
+                    <CheckBox x:Name="IncludeUnauthorized" Style="{StaticResource OptionBox}"
+                              Content="Incluir notas sem autorização (rejeitadas)" />
+
+                    <ProgressBar x:Name="Progress" Style="{StaticResource GradientProgress}" Margin="0,20,0,0" />
+                    <TextBlock x:Name="MessageText" Style="{StaticResource SmallText}" Margin="0,8,0,0" />
+                </StackPanel>
+            </Grid>
+                <local:AboutPanel x:Name="AboutView" VerticalAlignment="Top" Visibility="Collapsed" Back="AboutBack" />
         </Grid>
 
         <DockPanel Margin="0,18,0,0" LastChildFill="False">
@@ -124,6 +127,8 @@
                     local:Ui.Icon="{StaticResource IconFolder}" Click="OpenFolderClick" />
             <Button DockPanel.Dock="Left" Content="Configurações" Style="{StaticResource PillButton}" Margin="10,0,0,0"
                     local:Ui.Icon="{StaticResource IconSliders}" Click="SettingsClick" />
+            <Button DockPanel.Dock="Left" Content="Sobre" Style="{StaticResource PillButton}" Margin="10,0,0,0"
+                    local:Ui.Icon="{StaticResource IconAbout}" Click="AboutClick" />
             <Button x:Name="ExportButton" DockPanel.Dock="Right" Content="Gerar XMLs" Style="{StaticResource PrimaryButton}"
                     local:Ui.Icon="{StaticResource IconDownload}" Click="ExportClick" />
             <Button x:Name="StopButton" DockPanel.Dock="Right" Content="Parar" Style="{StaticResource PillButton}"
