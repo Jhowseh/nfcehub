@@ -1,12 +1,13 @@
 # NFCeHub
 
-Programa de janela (Windows) que gera os arquivos XML das NFC-e direto do banco do SysPDV, para o cliente enviar ao contador ou guardar. O banco é só lido: a conexão usa uma transação somente leitura e nunca grava nada.
+Aplicativo desktop para Windows que exporta os arquivos XML das NFC-e diretamente do banco de dados do SysPDV, para envio à contabilidade ou arquivamento. O acesso ao banco é exclusivamente de leitura: a conexão é aberta em uma transação somente leitura e nenhum dado é gravado.
 
-O cliente informa série e números (uma nota, uma faixa como "122 a 150" ou várias faixas) ou importa um PDF/TXT/CSV com a relação das notas, escolhe a pasta e clica em **Gerar XMLs**.
+O usuário informa a série e os números das notas (uma nota, um intervalo como "122 a 150" ou vários intervalos) ou importa a relação de notas a partir de um arquivo PDF, TXT ou CSV. Em seguida, seleciona a pasta de destino e clica em **Gerar XMLs**.
 
-Feito em C# para **.NET Framework 4.8** (WPF). Roda do Windows 7 SP1 ao Windows 11; no Windows 10/11 o .NET Framework 4.8 já vem instalado. É distribuído como um único `NFCeHub.exe` de ~3,6 MB.
+Desenvolvido em C# com WPF sobre o **.NET Framework 4.8**. É compatível com Windows 7 SP1 até Windows 11 (no Windows 10 e 11, o .NET Framework 4.8 já vem instalado) e é distribuído como um executável único, `NFCeHub.exe`, de aproximadamente 3,6 MB.
 
-O manual do cliente está em [LEIA-ME.txt](LEIA-ME.txt). Os detalhes técnicos estão em [docs/funcionamento.md](docs/funcionamento.md).
+- Manual do usuário: [LEIA-ME.txt](LEIA-ME.txt)
+- Documentação técnica: [docs/funcionamento.md](docs/funcionamento.md)
 
 ## Estrutura
 
@@ -104,16 +105,3 @@ src\NFCeHub.Cli\bin\Release\net48\nfcehub-cli.exe --list relatorio.pdf --output 
 ```
 
 Opções: `--config`, `--series`, `--start`, `--end`, `--list` (PDF/TXT/CSV), `--output`, `--no-cancellation`, `--include-unauthorized`, `--by-month` e `--print-text` (mostra o texto extraído de um PDF, para ajustar a leitura de um formato novo).
-
-## O que não vai para o Git
-
-O [.gitignore](.gitignore) deixa de fora o `config.ini` (tem a senha do banco), a `dist/`, as pastas `bin/`, `obj/` e `.vs/`, o `.claude/settings.local.json` e qualquer dado de cliente: XMLs de NFC-e, relatórios `Relatorio-NFCe-*.txt` e PDFs.
-
-## Histórico
-
-- Antes o programa se chamava "XML NFC-e – SysPDV" (`XML-NFCe-SysPDV.exe`) e o projeto, ExportaXML. Com o nome NFCeHub mudaram o `.exe`, o título das janelas, a pasta de log (antes `%LOCALAPPDATA%\ExportaXML-NFCe`), a trava de instância única e o AppUserModelID. O `config.ini` continua no mesmo formato: basta copiá-lo para a pasta do `NFCeHub.exe`.
-- A primeira versão foi feita em Python (removida em 10/11/2026). As duas versões geravam XMLs idênticos byte a byte e liam os PDFs com o mesmo resultado.
-
-## Regras do projeto
-
-As regras de código (sem comentários, código em inglês, textos do cliente em português) estão em [.claude/CLAUDE.md](.claude/CLAUDE.md).
