@@ -40,6 +40,41 @@ O zlib é descompactado pulando os 2 bytes de cabeçalho (`0x78 ...`) e lendo o 
 
 A tabela `TRANSACAO_XMLLOG` guarda XMLs de log (envios com problema) e não é usada.
 
+### Notas `AU` com o XML errado (defeito do SysPDV na contingência)
+
+Algumas notas com `TRNSTA = 'AU'` e `TRNXMLCSTAT = 100` saem como **sem autorização**, com o detalhe "AUTORIZADO O USO DA NF-E". Não é erro de leitura do programa: o XML guardado pelo SysPDV não é o da nota autorizada.
+
+O que acontece no caixa:
+
+1. A venda é enviada em emissão normal (`tpEmis` 1) e a SEFAZ autoriza.
+2. O caixa não recebe a resposta a tempo, entra em contingência offline e gera outra versão da mesma nota (`tpEmis` 9). Muda a chave de acesso (o dígito do tipo de emissão e o dígito verificador), mas o número e a série continuam os mesmos.
+3. Ao transmitir a contingência, o SysPDV descobre que a nota já estava autorizada e junta o protocolo da emissão normal à NFC-e de contingência.
+
+O `TRNXML` dessas notas fica assim:
+
+- A raiz é `<procEventoNFe>` em vez de `<nfeProc>`, e a tag da nota vem quebrada: `<procEventoNFe><NFe>xmlns="..."`. O arquivo nem é um XML válido.
+- A `<NFe>` é a de contingência (`tpEmis` 9, chave terminada em `9...`).
+- O `<protNFe>` é da emissão normal: o `chNFe` do protocolo é diferente do `Id` da nota, e o `digVal` do protocolo não bate com o `DigestValue` da assinatura da nota.
+- A chave autorizada é a do protocolo, a mesma que está em `TRANSACAO.TRNNFCECHVNFE`.
+
+Exemplo conferido: série 2, nº 139873, de 17/10/2026. A chave autorizada é `25261027233500000120650020001398731021601788` (protocolo `225260421236435`), e a nota guardada tem a chave `25261027233500000120650020001398739021601783`.
+
+A NFC-e autorizada (a versão de emissão normal, assinada) não fica guardada em lugar nenhum do computador:
+
+- Não está na `TRANSACAO_XMLNOTA` nem na `TRANSACAO_XMLLOG`.
+- A pasta `C:\Syspdv\NFCe\Vendas` só tem notas de contingência. Os arquivos são `<chave>-nfe.xml`: as que já foram transmitidas ficam como `<nfeProc>` com o protocolo da própria chave, e as outras ficam só como `<NFe>`, sem protocolo. Para essas notas com defeito, o arquivo de lá é idêntico, byte a byte, à `<NFe>` de contingência do banco, sem protocolo. Ler a pasta não resolve.
+- Também não dá para reconstruir a versão autorizada a partir da de contingência. Trocar a chave, o `tpEmis` e o `cDV` e tirar `dhCont` e `xJust` não reproduz o `digVal` do protocolo, então a nota autorizada tem outras diferenças (o horário de emissão, por exemplo).
+
+Por isso o programa não exporta esse XML como autorizado: ele é inválido e a contabilidade o recusaria. A nota aparece como sem autorização e entra no relatório de notas não exportadas. Na SEFAZ ela está autorizada com a chave do protocolo, e o defeito precisa ser tratado com o suporte do SysPDV.
+
+Frequência medida no banco deste servidor, de 01/11/2025 a 11/11/2026:
+
+| XML | Notas |
+|---|---|
+| Emissão normal autorizada, correto | 178.835 |
+| Contingência autorizada com a própria chave (cStat 100 ou 150), correto | 2.347 |
+| Contingência com o protocolo de outra chave (o defeito) | 907 `AU` e 1 `CA` |
+
 ## Exportação (`Export/Exporter.cs`)
 
 Todo o SQL das tabelas do SysPDV fica em `Data/SysPdv.cs`: busca das notas, busca do XML, última NFC-e emitida e teste de conexão.
@@ -77,7 +112,7 @@ Situação de cada nota:
 |---|---|---|
 | autorizada | Há `<nfeProc>` com protocolo | `<chave>-nfe.xml` |
 | cancelada | Há `<nfeProc>` e evento 110111 (ou `TRNSTA = 'CA'`) | `<chave>-nfe.xml` e, se a opção estiver ligada, `110111<chave>01-procEventoNFe.xml` |
-| sem autorização | Só há XML sem protocolo | Nada, ou `Sem autorizacao/<chave>-nfe.xml` se a opção estiver ligada |
+| sem autorização | Só há XML sem protocolo, ou o XML com defeito da contingência (ver [Notas `AU` com o XML errado](#notas-au-com-o-xml-errado-defeito-do-syspdv-na-contingência)) | Nada, ou `Sem autorizacao/<chave>-nfe.xml` se a opção estiver ligada (o XML com defeito nunca é gravado) |
 | não encontrada | Número não existe no banco | Nada |
 | erro | Falha ao ler ou descompactar | Nada |
 

@@ -9,6 +9,14 @@ Desenvolvido em C# com WPF sobre o **.NET Framework 4.8**. É compatível com Wi
 - Manual do usuário: [LEIA-ME.txt](LEIA-ME.txt)
 - Documentação técnica: [docs/funcionamento.md](docs/funcionamento.md)
 
+## Notas autorizadas que saem como "sem autorização"
+
+Algumas NFC-e com situação `AU` no SysPDV aparecem como **sem autorização**, com o detalhe "AUTORIZADO O USO DA NF-E". Isso é um defeito do SysPDV, não do NFCeHub.
+
+Acontece quando o caixa entra em contingência logo depois de a SEFAZ já ter autorizado a nota em emissão normal. O SysPDV guarda a versão de contingência (outra chave de acesso) junto com o protocolo da versão autorizada, e o XML fica inválido. A versão autorizada não é guardada em lugar nenhum: nem no banco, nem na pasta `C:\Syspdv\NFCe\Vendas`, que só tem a mesma nota de contingência, sem protocolo.
+
+O programa não exporta esse XML, porque a contabilidade o recusaria. Na SEFAZ, a nota está autorizada com a chave que aparece em `TRANSACAO.TRNNFCECHVNFE`. Detalhes, exemplo e frequência em [docs/funcionamento.md](docs/funcionamento.md#notas-au-com-o-xml-errado-defeito-do-syspdv-na-contingência).
+
 ## Estrutura
 
 ```
