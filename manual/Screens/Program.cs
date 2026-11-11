@@ -38,21 +38,21 @@ public static class Program
                 Source = new Uri($"pack://application:,,,/NFCeHub;component/Themes/{name}.xaml"),
             });
         }
-        LightTheme(app.Resources);
+        Theme.Apply(app.Resources);
+        UseTheme(app.Resources, false);
         AppPaths.ConfigFile = SampleConfig();
-
-        CaptureMain();
-        CaptureSettings();
         EventManager.RegisterClassHandler(typeof(MessageDialog), FrameworkElement.LoadedEvent,
             new RoutedEventHandler(OnDialogLoaded));
-        dialogName = "import.png";
-        Dialogs.ConfirmImport(null, "Notas não lançadas - outubro 2026.pdf", SampleReading());
-        dialogName = "export.png";
-        var summary = SampleSummary();
-        Dialogs.ExportFinished(null, summary,
-            Path.Combine(SampleFolder, "Relatorio-NFCe-nao-exportadas-20261111-103512.txt"),
-            "178 arquivos XML gravados.");
+
+        CaptureMain("main.png", true);
+        CaptureSettings();
+        CaptureDialogs("");
         SaveAssets();
+
+        UseTheme(app.Resources, true);
+        CaptureMain("main-dark.png", false);
+        CaptureDialogs("-dark");
+
         WriteMarkers();
         File.Delete(AppPaths.ConfigFile);
         Console.WriteLine("Images: " + output);
@@ -67,10 +67,9 @@ public static class Program
         helper.GetProperty("ResourceAssembly", shared).SetValue(null, assembly);
     }
 
-    private static void LightTheme(ResourceDictionary resources)
+    private static void UseTheme(ResourceDictionary resources, bool dark)
     {
-        Theme.Apply(resources);
-        typeof(Theme).GetProperty(nameof(Theme.IsDark)).GetSetMethod(true).Invoke(null, new object[] { false });
+        typeof(Theme).GetProperty(nameof(Theme.IsDark)).GetSetMethod(true).Invoke(null, new object[] { dark });
         var palette = Theme.Palette;
         foreach (var pair in palette)
         {
@@ -118,7 +117,17 @@ public static class Program
     private static void Call(object owner, string name, params object[] args) =>
         owner.GetType().GetMethod(name, Hidden).Invoke(owner, args);
 
-    private static void CaptureMain()
+    private static void CaptureDialogs(string suffix)
+    {
+        dialogName = $"import{suffix}.png";
+        Dialogs.ConfirmImport(null, "Notas não lançadas - outubro 2026.pdf", SampleReading());
+        dialogName = $"export{suffix}.png";
+        Dialogs.ExportFinished(null, SampleSummary(),
+            Path.Combine(SampleFolder, "Relatorio-NFCe-nao-exportadas-20261111-103512.txt"),
+            "178 arquivos XML gravados.");
+    }
+
+    private static void CaptureMain(string name, bool withMarkers)
     {
         var window = new MainWindow();
         var header = Field<Header>(window, "HeaderBar");
@@ -138,7 +147,7 @@ public static class Program
         end.Text = "52180";
 
         var host = Detach(window);
-        var points = new List<(FrameworkElement Element, string Anchor, string Side)>
+        var points = withMarkers ? new List<(FrameworkElement Element, string Anchor, string Side)>
         {
             ((FrameworkElement)header.FindName("Dot"), "right", "r"),
             (series, "left", "l"),
@@ -151,8 +160,8 @@ public static class Program
             (ButtonByText(host, "Abrir pasta"), "left", "l"),
             (ButtonByText(host, "Configurações"), "right", "r"),
             (ButtonByText(host, "Sobre"), "right", "r"),
-        };
-        Save(host, "main.png", points);
+        } : new List<(FrameworkElement Element, string Anchor, string Side)>();
+        Save(host, name, points);
         window.Close();
     }
 

@@ -27,6 +27,7 @@ MONTHS = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "
 
 TEXT, MUTED, FAINT = (31, 35, 40), (89, 99, 110), (101, 109, 118)
 BORDER, CARD, LINK = (209, 217, 224), (246, 248, 250), (9, 105, 218)
+DARK_BORDER = (48, 54, 61)
 VIOLET, GREEN, YELLOW, RED = (139, 92, 246), (26, 127, 55), (154, 103, 0), (207, 34, 46)
 DOT_GREEN = (63, 185, 80)
 WARNING_BG, WARNING_BORDER = (255, 248, 197), (212, 167, 44)
@@ -42,10 +43,10 @@ def prepare_images():
     frame(IMG / "export.png", TMP / "export.png")
     README_IMG.mkdir(parents=True, exist_ok=True)
     for name in ("main", "import", "export"):
-        frame(IMG / f"{name}.png", README_IMG / f"{name}.png")
+        frame(IMG / f"{name}-dark.png", README_IMG / f"{name}.png", color=DARK_BORDER)
 
 
-def frame(source, target, radius=26):
+def frame(source, target, radius=26, color=BORDER):
     img = Image.open(source).convert("RGBA")
     ss = 3
     W, H = img.width * ss, img.height * ss
@@ -55,7 +56,7 @@ def frame(source, target, radius=26):
     out = Image.new("RGBA", img.size, (255, 255, 255, 0))
     out.paste(img, (0, 0), mask)
     border = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(border).rounded_rectangle([1, 1, W - 2, H - 2], radius * ss, outline=BORDER + (255,), width=3 * ss)
+    ImageDraw.Draw(border).rounded_rectangle([1, 1, W - 2, H - 2], radius * ss, outline=color + (255,), width=3 * ss)
     out.alpha_composite(border.resize(img.size, Image.LANCZOS))
     out.save(target)
     return target

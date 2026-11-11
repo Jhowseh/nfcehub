@@ -85,7 +85,7 @@ NFCeHub/
 ├── tests/
 │   └── NFCeHub.Core.Tests/          testes automáticos do núcleo (xUnit)
 ├── docs/                            documentação técnica
-│   └── img/                         imagens das telas usadas neste README (geradas com o manual)
+│   └── img/                         imagens das telas (tema escuro) usadas neste README, geradas com o manual
 ├── manual/                          manual do usuário em PDF
 │   ├── Screens/                     gera as imagens das telas → nfcehub-screens.exe
 │   ├── img/                         imagens das telas, ícones e logo (geradas, fora do Git)
@@ -131,7 +131,7 @@ pip install -r manual/requirements.txt
 powershell -ExecutionPolicy Bypass -File manual/build-manual.ps1
 ```
 
-O script compila o `nfcehub-screens.exe`, que gera as imagens das telas com dados fictícios em `manual/img/`, e depois roda o `build_manual.py`, que monta o PDF. `-SkipScreens` reaproveita as imagens já geradas; como `manual/img/` fica fora do Git, num clone novo rode o script completo uma vez antes. A versão impressa no manual vem do `Directory.Build.props`. O mesmo script atualiza as imagens deste README em `docs/img/`, que ficam no Git. Ao mudar uma tela ou o comportamento do programa, gere o manual de novo, revise o texto em `manual/build_manual.py` e versione as imagens novas de `docs/img/`. Detalhes em [docs/manual.md](docs/manual.md).
+O script compila o `nfcehub-screens.exe`, que gera as imagens das telas com dados fictícios em `manual/img/`, e depois roda o `build_manual.py`, que monta o PDF. `-SkipScreens` reaproveita as imagens já geradas; como `manual/img/` fica fora do Git, num clone novo rode o script completo uma vez antes. A versão impressa no manual vem do `Directory.Build.props`. O mesmo script atualiza as imagens deste README em `docs/img/` (telas no tema escuro), que ficam no Git. Ao mudar uma tela ou o comportamento do programa, gere o manual de novo, revise o texto em `manual/build_manual.py` e versione as imagens novas de `docs/img/`. Detalhes em [docs/manual.md](docs/manual.md).
 
 ## Testes
 
