@@ -11,13 +11,18 @@ TestResults/
 dist/
 
 config.ini
-!config.example.ini
 *.log
 
 *-nfe.xml
 *-procEventoNFe.xml
 Relatorio-NFCe-*.txt
 *.pdf
+*.fdb
 
 Thumbs.db
 Desktop.ini
+
+__pycache__/
+.venv/
+
+manual/img/

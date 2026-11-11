@@ -1,13 +1,28 @@
 # NFCeHub
 
-Aplicativo desktop para Windows que exporta os arquivos XML das NFC-e diretamente do banco de dados do SysPDV, para envio à contabilidade ou arquivamento. O acesso ao banco é exclusivamente de leitura: a conexão é aberta em uma transação somente leitura e nenhum dado é gravado.
+Aplicativo desktop para Windows que exporta os arquivos XML das NFC-e diretamente do banco de dados do SysPDV, para envio à contabilidade ou arquivamento.
 
-O usuário informa a série e os números das notas (uma nota, um intervalo como "122 a 150" ou vários intervalos) ou importa a relação de notas a partir de um arquivo PDF, TXT ou CSV. Em seguida, seleciona a pasta de destino e clica em **Gerar XMLs**.
+- Manual do usuário: [LEIA-ME.txt](LEIA-ME.txt) e o manual em PDF, gerado em `dist/Manual-NFCeHub.pdf` (ver [Manual em PDF](#manual-em-pdf))
+- Documentação técnica: [docs/funcionamento.md](docs/funcionamento.md) e [docs/manual.md](docs/manual.md)
+
+## Por que usar
+
+O próprio SysPDV tem uma rotina para exportar os XMLs, mas ela é lenta, pouco prática e pouco intuitiva para o cliente quando ele precisa gerar os XMLs de várias sequências e séries diferentes.
+
+O NFCeHub resolve isso em uma única tela:
+
+- **Várias faixas de uma vez:** uma nota, um intervalo como "122 a 150" ou vários intervalos, de uma ou mais séries, no mesmo pedido.
+- **Importação da relação de notas:** a lista pode vir de um arquivo PDF, TXT ou CSV, sem digitar número por número.
+- **Resultado organizado:** com mais de uma série, os XMLs são separados em uma pasta por série; as notas que não puderam ser exportadas ficam em um relatório na pasta de destino.
+- **Mais rápido:** os XMLs são lidos direto do banco de dados, sem passar pelas telas do SysPDV.
+
+Basta informar as notas, escolher a pasta de destino e clicar em **Gerar XMLs**.
+
+O acesso ao banco é exclusivamente de leitura: a conexão é aberta em uma transação somente leitura e nenhum dado é gravado.
+
+## Requisitos e distribuição
 
 Desenvolvido em C# com WPF sobre o **.NET Framework 4.8**. É compatível com Windows 7 SP1 até Windows 11 (no Windows 10 e 11, o .NET Framework 4.8 já vem instalado) e é distribuído como um executável único, `NFCeHub.exe`, de aproximadamente 3,6 MB.
-
-- Manual do usuário: [LEIA-ME.txt](LEIA-ME.txt)
-- Documentação técnica: [docs/funcionamento.md](docs/funcionamento.md)
 
 ## Notas autorizadas que saem como "sem autorização"
 
@@ -53,6 +68,11 @@ NFCeHub/
 ├── tests/
 │   └── NFCeHub.Core.Tests/          testes automáticos do núcleo (xUnit)
 ├── docs/                            documentação técnica
+├── manual/                          manual do usuário em PDF
+│   ├── Screens/                     gera as imagens das telas → nfcehub-screens.exe
+│   ├── img/                         imagens das telas, ícones e logo (geradas, fora do Git)
+│   ├── build_manual.py              monta o PDF (fpdf2)
+│   └── build-manual.ps1             gera as imagens e o PDF
 ├── dist/                            saída do build (fora do Git)
 ├── .claude/                         regras do projeto (CLAUDE.md) e skills do Claude Code
 ├── .github/workflows/build.yml      compilação e testes no GitHub
@@ -83,6 +103,17 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 Compila a solução, roda os testes e gera `dist/NFCeHub.exe` com `LEIA-ME.txt` e `config.example.ini` junto. As bibliotecas (Firebird, PdfPig) ficam embutidas no `.exe` pelo Costura, então não há DLLs para distribuir. `-SkipTests` pula os testes.
 
 A `dist/` não é versionada no Git. A cada envio para o branch `main`, o GitHub compila, testa e guarda a `dist/` como artefato da execução (aba *Actions*). Para publicar uma versão, anexe o `NFCeHub.exe` numa *Release* do GitHub.
+
+## Manual em PDF
+
+O manual de instalação e uso para o cliente é gerado em `dist/Manual-NFCeHub.pdf`, no mesmo visual do manual do PreDANFE. Precisa do Python 3 com `fpdf2` e `Pillow`:
+
+```bash
+pip install -r manual/requirements.txt
+powershell -ExecutionPolicy Bypass -File manual/build-manual.ps1
+```
+
+O script compila o `nfcehub-screens.exe`, que gera as imagens das telas com dados fictícios em `manual/img/`, e depois roda o `build_manual.py`, que monta o PDF. `-SkipScreens` reaproveita as imagens já geradas; como `manual/img/` fica fora do Git, num clone novo rode o script completo uma vez antes. A versão impressa no manual vem do `Directory.Build.props`. Ao mudar uma tela ou o comportamento do programa, gere o manual de novo e revise o texto em `manual/build_manual.py`. Detalhes em [docs/manual.md](docs/manual.md).
 
 ## Testes
 

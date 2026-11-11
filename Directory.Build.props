@@ -5,7 +5,7 @@
     <LangVersion>12</LangVersion>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <Version>2.0.0</Version>
+    <Version>1.0.0</Version>
     <Company>PBtec</Company>
     <Product>NFCeHub</Product>
     <Copyright>PBtec</Copyright>
