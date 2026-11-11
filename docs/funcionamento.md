@@ -44,10 +44,30 @@ A tabela `TRANSACAO_XMLLOG` guarda XMLs de log (envios com problema) e não é u
 
 Todo o SQL das tabelas do SysPDV fica em `Data/SysPdv.cs`: busca das notas, busca do XML, última NFC-e emitida e teste de conexão.
 
-O banco não tem índice no número da NFC-e (`TRNNFCENUM`). Para não varrer a tabela uma vez por nota, a busca tem duas etapas:
+O banco não tem índice no número da NFC-e (`TRNNFCENUM`), nem em nenhuma outra tabela. Para não varrer a tabela uma vez por nota, a busca tem duas etapas:
 
-1. Uma consulta leve por série, sem os XMLs, cobrindo do menor ao maior número pedido (`TRNNFCENUM BETWEEN`, com o número completado com zeros até 10 dígitos). A série é conferida no programa, convertendo `TRNNFCESER` para número, porque pode estar gravada como `'1'` ou `'001'`.
+1. Uma consulta leve, sem os XMLs, que acha as transações dos números pedidos (`TRNNFCENUM BETWEEN`, com o número completado com zeros até 10 dígitos). A série é conferida no programa, convertendo `TRNNFCESER` para número, porque pode estar gravada como `'1'` ou `'001'`.
 2. Cada XML é buscado pela chave primária da `TRANSACAO_XMLNOTA` (`ID`), com uma consulta preparada uma vez só e reaproveitada.
+
+### Busca por janelas de data (`SysPdv.FindRecords`)
+
+Ler a `TRANSACAO` inteira custa caro com o cache do Firebird frio (o Firebird do SysPDV esvazia o cache poucos minutos depois de ficar sem uso). A busca usa o índice de data (`TRANSACAOINDEX2`, em `TRNDAT`) e lê só os dias necessários:
+
+- Começa pelos últimos 7 dias e vai voltando no tempo, dobrando o tamanho da janela a cada passo (7, 14, 28 e depois 56 dias por vez). A primeira janela não tem limite superior de data, para pegar transações com o relógio do caixa adiantado.
+- Em cada janela, além das transações dos números pedidos, vê o menor número de NFC-e vendido (`TRNTIP <> '0'`, sem os cancelamentos) em cada série. Como a numeração de uma série só cresce com o tempo, quando aparece uma venda com número menor que o menor número pedido daquela série, as notas pedidas já ficaram para trás e a série está concluída.
+- Ao concluir todas as séries, lê mais 7 dias antes da última janela, para pegar a venda de uma nota cujo cancelamento caiu no dia seguinte.
+- Se mesmo assim algum número pedido não for achado (nota inexistente, inutilizada ou numeração fora de ordem), esses números são procurados na tabela inteira, do jeito antigo. O resultado é sempre o mesmo da busca completa; só a nota não encontrada continua lenta com o cache frio.
+- Se as janelas chegarem à data da primeira transação do banco, a tabela já foi lida toda e não há busca completa.
+
+A ligação com a `TRANSACAO_XMLNOTA` é sempre um `LEFT JOIN` (as linhas sem XML são descartadas no programa). Com `JOIN` comum, o Firebird 2.5 escolhia o plano `JOIN (X NATURAL, T INDEX (RDB$PRIMARY394))`: lia a `TRANSACAO_XMLNOTA` inteira (a maior parte do banco, por causa dos XMLs) e buscava cada transação pela chave primária. O `LEFT JOIN` obriga a `TRANSACAO` a vir primeiro e o XML a ser buscado pelo índice `TRANSACAO_XMLNOTAINDEX1`.
+
+Medido no banco de 3,2 GB (um ano de vendas, cerca de 500 transações por dia), para 1 nota de um mês atrás:
+
+| Busca | Cache frio | Cache quente |
+|---|---|---|
+| `JOIN` antigo (lê a `TRANSACAO_XMLNOTA` inteira) | 55 a 121 s | 2,7 a 9,5 s |
+| `LEFT JOIN` na tabela inteira | cerca de 12 s | 0,6 s |
+| Janelas de data | lê só cerca de 2 meses da `TRANSACAO` | 0,65 s |
 
 As faixas pedidas são ordenadas e juntadas antes (faixas da mesma série que se encostam ou se sobrepõem viram uma só).
 
