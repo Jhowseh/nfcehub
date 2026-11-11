@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NFCeHub.Cli</RootNamespace>
+    <AssemblyName>nfcehub-cli</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NFCeHub.Core\NFCeHub.Core.csproj" />
+  </ItemGroup>
+
+</Project>

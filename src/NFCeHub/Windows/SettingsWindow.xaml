@@ -1,0 +1,53 @@
+<Window x:Class="NFCeHub.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:NFCeHub"
+        Title="NFCeHub – Configuração" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen" Icon="pack://application:,,,/Assets/app.ico"
+        UseLayoutRounding="True">
+    <StackPanel Margin="28,22,28,26" Width="520">
+        <local:Header x:Name="HeaderBar" />
+
+        <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+            <local:IconView Data="{StaticResource IconDatabase}" Size="20" />
+            <TextBlock Text="Banco de dados do SysPDV" Style="{StaticResource SectionText}" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+            <StackPanel Width="360">
+                <TextBlock Text="Servidor" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="HostField" Style="{StaticResource FieldBox}" />
+            </StackPanel>
+            <StackPanel Width="144" Margin="16,0,0,0">
+                <TextBlock Text="Porta" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="PortField" Style="{StaticResource FieldBox}" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Margin="0,12,0,0">
+            <TextBlock Text="Arquivo do banco" Style="{StaticResource FieldLabel}" />
+            <TextBox x:Name="PathField" Style="{StaticResource FieldBox}" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+            <StackPanel Width="252">
+                <TextBlock Text="Usuário" Style="{StaticResource FieldLabel}" />
+                <TextBox x:Name="UserField" Style="{StaticResource FieldBox}" />
+            </StackPanel>
+            <StackPanel Width="252" Margin="16,0,0,0">
+                <TextBlock Text="Senha" Style="{StaticResource FieldLabel}" />
+                <PasswordBox x:Name="PasswordField" Style="{StaticResource PasswordFieldBox}" />
+            </StackPanel>
+        </StackPanel>
+
+        <TextBlock x:Name="ResultText" Style="{StaticResource SmallText}" Margin="0,14,0,0" />
+
+        <DockPanel Margin="0,16,0,0" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Content="Testar conexão" Style="{StaticResource PillButton}"
+                    local:Ui.Icon="{StaticResource IconDatabase}" Click="TestConnection" />
+            <Button DockPanel.Dock="Right" Content="Salvar" Style="{StaticResource PrimaryButton}" Click="SaveClick" />
+            <Button DockPanel.Dock="Right" Content="Cancelar" Style="{StaticResource PillButton}" Margin="0,0,10,0"
+                    Click="CancelClick" />
+        </DockPanel>
+    </StackPanel>
+</Window>

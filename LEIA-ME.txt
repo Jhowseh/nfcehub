@@ -1,0 +1,67 @@
+NFCeHub – XML das NFC-e do SysPDV
+=================================
+
+Gera os arquivos XML das NFC-e direto do banco do SysPDV, para enviar ao
+contador ou guardar. O programa só LÊ o banco: nunca grava nada nele.
+
+
+REQUISITOS
+----------
+Windows 7 SP1 ao Windows 11, com o .NET Framework 4.8. No Windows 10 e 11
+ele já vem instalado. Em Windows mais antigo, se o programa não abrir,
+instale o .NET Framework 4.8 pelo Windows Update.
+
+
+PRIMEIRO USO
+------------
+1. Copie o NFCeHub.exe para uma pasta do computador servidor
+   (ex.: C:\NFCeHub). O config.ini será criado nessa mesma pasta.
+   Se já usava a versão antiga (XML-NFCe-SysPDV.exe), copie o config.ini
+   dela para a mesma pasta do NFCeHub.exe e apague o programa antigo.
+2. Abra o programa. Na primeira vez abre a tela de Configurações:
+   o servidor e o banco já vêm preenchidos com os do SysPDV.
+   Digite a senha do banco, clique em "Testar conexão" e depois em "Salvar".
+
+
+COMO USAR
+---------
+1. Em "Quais NFC-e", digite a série, o nº inicial e o nº final e clique em +.
+   - Uma nota só: deixe o nº final em branco.
+   - Pode adicionar várias faixas (ex.: 122 a 150 e depois 160 a 170).
+2. Ou clique em "Importar PDF" e escolha um PDF (ou TXT/CSV) com a relação
+   das notas. O programa reconhece:
+   - chaves de acesso (44 dígitos) – o jeito mais seguro;
+   - tabelas com colunas Inicial / Final / Série (ex.: relatório de "Notas
+     não lançadas de Saídas" do sistema do contador) ou Série / Número;
+     linhas de NF-e (modelo 55) são ignoradas;
+   - faixas escritas, como "122 a 150" ou "Inicial 122 Final 150";
+   - números soltos (usa a série digitada na tela).
+   Antes de pôr na lista, ele mostra o que encontrou para você conferir.
+3. Em "Onde salvar", escolha a pasta.
+4. Clique em "Gerar XMLs".
+
+
+O QUE É GRAVADO
+---------------
+- NFC-e autorizada:  <chave>-nfe.xml  (nota + protocolo de autorização)
+- NFC-e cancelada:   <chave>-nfe.xml  e  110111<chave>01-procEventoNFe.xml
+                     (o segundo é o evento de cancelamento; dá para desligar)
+- Sem autorização (rejeitada ou contingência não transmitida): só é gravada
+  se a opção estiver marcada, na subpasta "Sem autorizacao".
+- Opção "Separar em pastas por mês": cria subpastas AAAA-MM.
+
+Se alguma nota não for encontrada ou não tiver autorização, o programa grava
+na pasta um relatório "Relatorio-NFCe-nao-exportadas-....txt" com a lista.
+
+Os XMLs são gravados exatamente como estão no banco do SysPDV, sem nenhuma
+alteração (a assinatura digital continua válida).
+
+
+ONDE O SYSPDV GUARDA OS XMLs (para suporte)
+-------------------------------------------
+Banco syspdv_srv.fdb (Firebird 2.5):
+- TRANSACAO: série em TRNNFCESER, número em TRNNFCENUM, chave em TRNNFCECHVNFE.
+- TRANSACAO_XMLNOTA: o XML no campo TRNXML (compactado com zlib), ligado à
+  TRANSACAO por TRNSEQ + CXANUM + TRNDAT. TRNSTA: AU, CA ou RJ.
+
+Log de erros: %LOCALAPPDATA%\NFCeHub\nfcehub.log
