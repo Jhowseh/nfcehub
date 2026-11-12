@@ -9,7 +9,7 @@ Aplicativo desktop para Windows que exporta os arquivos XML das NFC-e diretament
 - Manual do usuário: [LEIA-ME.txt](LEIA-ME.txt) e o manual em PDF, gerado em `dist/Manual-NFCeHub.pdf` (ver [Manual em PDF](#manual-em-pdf))
 - Documentação técnica: [docs/funcionamento.md](docs/funcionamento.md) e [docs/manual.md](docs/manual.md)
 
-## Por que usar
+## Por que usar?
 
 O próprio SysPDV tem uma rotina para exportar os XMLs, mas ela é lenta, pouco prática e pouco intuitiva para o cliente quando ele precisa gerar os XMLs de várias sequências e séries diferentes.
 
@@ -166,3 +166,22 @@ src\NFCeHub.Cli\bin\Release\net48\nfcehub-cli.exe --list relatorio.pdf --output 
 ```
 
 Opções: `--config`, `--series`, `--start`, `--end`, `--list` (PDF/Word/TXT/CSV), `--output`, `--no-cancellation`, `--include-unauthorized`, `--by-month` e `--print-text` (mostra o texto extraído de um arquivo, para ajustar a leitura de um formato novo).
+
+## Créditos
+
+**NFCeHub**, da **PBtec - Soluções em Automação** · (83) 3224-3080
+
+Desenvolvimento e análise:
+
+- José Henrique
+- Erick Henrique
+- Eduardo Vasconcelos
+
+## Licença
+
+Distribuído sob a [Apache License 2.0](LICENSE). Você pode usar, modificar e redistribuir o NFCeHub, inclusive em projetos comerciais, desde que:
+
+- mantenha o arquivo [`NOTICE`](NOTICE) com os créditos ao distribuir o programa ou uma versão modificada dele;
+- indique nos arquivos alterados que eles foram modificados.
+
+As bibliotecas de terceiros embutidas no `NFCeHub.exe` (provedor do Firebird, PdfPig e outras, listadas no `NOTICE`) continuam sob as licenças dos seus donos. O nome e o logo da PBtec não estão incluídos na licença.

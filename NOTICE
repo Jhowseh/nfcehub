@@ -1,0 +1,27 @@
+NFCeHub
+Copyright 2026 PBtec - Soluções em Automação
+
+Este produto foi desenvolvido pela PBtec - Soluções em Automação
+(José Henrique, Erick Henrique, Eduardo Vasconcelos).
+https://github.com/Jhowseh/nfcehub
+
+Licenciado sob a Apache License, Version 2.0 (arquivo LICENSE).
+
+Bibliotecas de terceiros
+------------------------
+O NFCeHub.exe contém, embutidas, as bibliotecas abaixo. Elas NÃO estão
+cobertas pela licença do NFCeHub e continuam sob as licenças dos seus donos:
+
+- FirebirdSql.Data.FirebirdClient (provedor ADO.NET do Firebird), sob a
+  Initial Developer's Public License (IDPL).
+  https://github.com/FirebirdSQL/NETProvider
+- PdfPig, sob a Apache License, Version 2.0.
+  https://github.com/UglyToad/PdfPig
+- Costura.Fody, sob a MIT License. https://github.com/Fody/Costura
+- Microsoft.Bcl.HashCode, System.Buffers, System.Memory,
+  System.Numerics.Vectors, System.Runtime.CompilerServices.Unsafe e
+  System.Threading.Tasks.Extensions, da .NET Foundation, sob a MIT License.
+  https://github.com/dotnet/runtime
+
+Firebird é marca da Firebird Foundation. SysPDV pertence ao seu respectivo
+dono.
