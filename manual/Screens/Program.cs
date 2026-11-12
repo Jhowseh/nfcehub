@@ -152,7 +152,7 @@ public static class Program
             ((FrameworkElement)header.FindName("Dot"), "right", "r"),
             (series, "left", "l"),
             (Field<Button>(window, "AddButton"), "right", "r"),
-            (ButtonByText(host, "Importar PDF"), "left", "l"),
+            (ButtonByText(host, "Importar Documento"), "left", "l"),
             (Field<ScrollViewer>(window, "ListScroll"), "first-row", "l"),
             (Field<TextBox>(window, "FolderField"), "left", "l"),
             (Field<CheckBox>(window, "IncludeCancellation"), "left", "l"),

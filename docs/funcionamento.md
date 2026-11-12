@@ -65,7 +65,7 @@ A NFC-e autorizada (a versão de emissão normal, assinada) não fica guardada e
 - A pasta `C:\Syspdv\NFCe\Vendas` só tem notas de contingência. Os arquivos são `<chave>-nfe.xml`: as que já foram transmitidas ficam como `<nfeProc>` com o protocolo da própria chave, e as outras ficam só como `<NFe>`, sem protocolo. Para essas notas com defeito, o arquivo de lá é idêntico, byte a byte, à `<NFe>` de contingência do banco, sem protocolo. Ler a pasta não resolve.
 - Também não dá para reconstruir a versão autorizada a partir da de contingência. Trocar a chave, o `tpEmis` e o `cDV` e tirar `dhCont` e `xJust` não reproduz o `digVal` do protocolo, então a nota autorizada tem outras diferenças (o horário de emissão, por exemplo).
 
-Por isso o programa não exporta esse XML como autorizado: ele é inválido e a contabilidade o recusaria. A nota aparece como sem autorização e entra no relatório de notas não exportadas. Na SEFAZ ela está autorizada com a chave do protocolo, e o defeito precisa ser tratado com o suporte do SysPDV.
+Por isso o programa não exporta esse XML como autorizado: ele é inválido e a contabilidade o recusaria. A nota aparece como sem autorização e entra no relatório de notas não exportadas. Na SEFAZ ela está autorizada com a chave do protocolo.
 
 Frequência medida no banco deste servidor, de 01/11/2025 a 11/11/2026:
 
@@ -132,9 +132,28 @@ Desempenho medido neste servidor (5.001 números, 3.979 XMLs gravados): cerca de
 
 ## Leitura da relação de notas (`Import/ListReader.cs`)
 
-O texto do PDF é extraído (em `Import/DocumentText.cs`) com a biblioteca PdfPig. As palavras de cada página são agrupadas em linhas pela altura da base do texto (palavras com bases a até metade da altura da letra, no mínimo 2 pontos, ficam na mesma linha), de cima para baixo e da esquerda para a direita. TXT e CSV são lidos como UTF-8 e, se falhar, como Windows-1252. PDF escaneado (imagem) não tem texto para ler.
+O formato do arquivo é reconhecido pelo conteúdo, não pela extensão (em `Import/DocumentText.cs`), porque vários sistemas gravam com extensão `.doc` arquivos que são RTF ou HTML por dentro (o relatório da Alterdata, por exemplo, é RTF):
 
-Para ver o texto que o programa extraiu de um PDF novo, use `nfcehub-cli.exe --print-text arquivo.pdf`.
+| Começo do arquivo | Formato | Leitura |
+|---|---|---|
+| `%PDF-` (nos primeiros 1024 bytes) | PDF | PdfPig, linhas montadas pela posição das palavras (abaixo) |
+| `{\rtf` | RTF | `RtfText.cs` |
+| `PK` (zip) com `word/document.xml` | Word `.docx` | `DocxText.cs` |
+| `D0 CF 11 E0` (arquivo composto OLE) | Word 97-2003 `.doc` | `CompoundFile.cs` e `WordBinaryText.cs` |
+| `<html`, `<!doctype html`, `<body`... | HTML (inclusive "página da Web" salva como `.doc`) | `DocumentText.Html` |
+| qualquer outro | texto | UTF-8 e, se falhar, Windows-1252; UTF-16 com BOM |
+
+Em todos os formatos, parágrafo e quebra de linha viram nova linha, tabulação vira tab, e as células de uma linha de tabela ficam na mesma linha, separadas por tab.
+
+- **RTF:** decodifica `\'hh` pela página de código do `\ansicpgN` (padrão 1252) e `\uN` (pulando os `\ucN` caracteres de reserva). Ignora tabelas de fontes, cores e estilos, informações do documento, imagens, objetos, cabeçalho e rodapé, números de lista (`\listtext`, `\pntext`), códigos de campo (`\fldinst`) e todo grupo `{\* ...}`.
+- **.docx:** lê só `word/document.xml` (cabeçalho e rodapé ficam em outras partes e não são lidos). Usa `w:t`; `w:tab` só dentro de `w:r` (dentro de `w:tabs` é posição de tabulação, não texto); ignora `w:delText` (texto excluído com controle de alterações), `w:instrText` (códigos de campo) e `mc:Fallback` (cópia do conteúdo de caixas de texto). Parágrafos dentro de uma célula são juntados com espaço.
+- **.doc 97-2003:** o arquivo composto é lido pela FAT, MiniFAT e diretório. Do fluxo `WordDocument`, a FIB dá a tabela (`0Table` ou `1Table`), o tamanho do texto principal (`ccpText`) e a posição do CLX (`fcClx`, par 33 da `FibRgFcLcb97`). A tabela de trechos (`PlcPcd`) diz onde está cada trecho do texto: comprimido (1 byte por caractere, Windows-1252) ou UTF-16. Só o texto principal é lido (notas de rodapé, cabeçalhos e comentários vêm depois dele). Códigos de campo (entre `0x13` e `0x14`) são descartados e o resultado do campo é mantido. Fim de célula é `0x07`; dois `0x07` seguidos (fim da última célula e fim da linha) viram nova linha. Documento protegido por senha e Word 6/95 geram erro com mensagem.
+- **HTML:** remove `head`, `style`, `script` e comentários, junta os espaços (quebras de linha do código não são quebras no texto), troca `<br>` e o fim de `p`, `div`, `tr`, `li`, títulos e tabelas por nova linha, o fim de `td`/`th` por tab, e decodifica as entidades (`&eacute;`, `&nbsp;`).
+- Testado com o relatório da Alterdata (RTF) e com o mesmo conteúdo salvo pelo Word como `.docx`, `.doc` 97-2003, HTML filtrado e PDF: todos dão o mesmo resultado. O teste `ReadsWord97DocumentWithTable` usa `tests/NFCeHub.Core.Tests/Samples/table.doc`, gerado no Word com dados inventados e sem informações pessoais.
+
+O texto do PDF é extraído com a biblioteca PdfPig. As palavras de cada página são agrupadas em linhas pela altura da base do texto (palavras com bases a até metade da altura da letra, no mínimo 2 pontos, ficam na mesma linha), de cima para baixo e da esquerda para a direita. PDF escaneado (imagem) não tem texto para ler.
+
+Para ver o texto que o programa extraiu de um arquivo novo (PDF, Word, HTML ou texto), use `nfcehub-cli.exe --print-text arquivo`.
 
 Formatos reconhecidos, nesta ordem de preferência:
 
@@ -144,14 +163,18 @@ Formatos reconhecidos, nesta ordem de preferência:
    - Linhas com poucos números (número de página, por exemplo) são ignoradas.
    - Modelo 55 é ignorado; modelo diferente de 65 também.
    - Exemplo real: relatório "Notas não lançadas de Saídas" do sistema da Procontal, com as colunas `Inicial a Final  Série  Espécie`.
-3. **Sem cabeçalho:** faixas escritas (`122 a 150`, `122 até 150`, `122-150`, `inicial 122 final 150`) e números soltos. O resto de uma linha de faixa (por exemplo "caixa 1") não vira nota.
+   - Quando a única coluna é "número", cada linha pode trazer uma faixa (`024684 / 024688`, `100 a 120`) ou um número só.
+   - Exemplo real: relatório "Análise de Sequência de Notas" da Alterdata. O cabeçalho "Número(s) não lançado(s):" vira a coluna "número", cada bloco começa com "Modelo da Nota: 65" e "Série da Nota: 00005", e as faixas vêm como `024684 / 024688`. O cabeçalho da empresa (`( 00785) NOME DA EMPRESA`) se repete em cada página do PDF.
+3. **Sem cabeçalho:** faixas escritas (`122 a 150`, `122 até 150`, `122-150`, `122 / 150`, `inicial 122 final 150`) e números soltos. O resto de uma linha de faixa (por exemplo "caixa 1") não vira nota.
 
 Regras comuns:
 
 - O texto é comparado sem acentos e em minúsculas ("nº" vira "no").
 - Linhas com "NF-e", "NFe" ou "modelo 55" são ignoradas, a não ser que também tenham "NFC-e", "modelo 65" ou "cupom".
-- "Série 2" numa linha vale para as linhas seguintes. Sem série no arquivo, vale a série digitada na tela.
-- São removidos antes da leitura: CNPJ, CPF, datas (`25/09/2026`, `2026-09-25`), horas, valores com 2 decimais (`1.234,56`), percentuais, "página 1 de 3", "1/3" e números com 20 dígitos ou mais.
+- "Série 2" numa linha vale para as linhas seguintes. Também valem "Série da Nota: 00002", "Série do Cupom 2" e zeros à esquerda. Sem série no arquivo, vale a série digitada na tela. O número da série não vira nota.
+- Uma linha só com o modelo ("Modelo 55", "Modelo da Nota: 65") vale para as linhas seguintes: depois de modelo 55, as notas são contadas como NF-e e ignoradas, até aparecer modelo 65. Na tabela com coluna de modelo, vale a coluna.
+- Série e modelo também são lidos antes do cabeçalho da tabela.
+- São removidos antes da leitura: CNPJ, CPF, datas (`25/09/2026`, `2026-09-25`), horas, valores com 2 decimais (`1.234,56`), percentuais, "página 1 de 3", "1/3", números entre parênteses (`( 00785)`, código da empresa) e números com 20 dígitos ou mais.
 - Número com separador de milhar sem decimais (`264.371`) vira `264371`.
 - Linhas de total, quantidade, CNPJ, CPF, inscrição, telefone e CEP são ignoradas.
 - Um número inteiro não pode ser pedaço de um número maior nem de um decimal (`1.5`, `2,30`), mas pode vir seguido de vírgula numa lista (`200, 205, 206`).
@@ -184,16 +207,16 @@ A chave `fbclient` da versão Python não é mais usada e é retirada quando o a
 
 ## Janela (`MainWindow`, `SettingsWindow`, `Header`)
 
-- A janela tem duas colunas para caber em telas de 768 px de altura: à esquerda as notas (campos, importar PDF e lista de faixas), à direita a pasta, as opções e o progresso.
+- A janela tem duas colunas para caber em telas de 768 px de altura: à esquerda as notas (campos, importar documento e lista de faixas), à direita a pasta, as opções e o progresso.
 - Ao abrir, busca a última NFC-e emitida nos últimos 120 dias (usa o índice de `TRNDAT`) e mostra só no texto que aparece ao passar o mouse na bolinha de status do cabeçalho.
-- Acesso ao banco e leitura de PDF rodam em segundo plano (`Task.Run`), para a janela não travar. O progresso da exportação é lido pela janela a cada 80 ms.
+- Acesso ao banco e leitura do documento importado rodam em segundo plano (`Task.Run`), para a janela não travar. O progresso da exportação é lido pela janela a cada 80 ms.
 - Enter num dos campos de número põe a faixa na lista. Os botões só com ícone (`+`, pasta, `×`) têm nome de acessibilidade, para leitores de tela.
 - A pasta é escolhida com a janela moderna do Windows (`IFileOpenDialog` com `FOS_PICKFOLDERS`), em vez da janela em árvore antiga do .NET Framework.
 - Os textos e as cores de cada situação (autorizada, cancelada, sem autorização, não encontrada, com erro) ficam numa tabela só, em `StatusLabels.cs`, usada pela mensagem de fim da exportação na janela e pelos destaques da caixa de resultado.
 - Só uma instância do programa por sessão do Windows (mutex `Local\NFCeHub`). Ao abrir de novo, a janela já aberta vem para a frente: ela é achada pelo título `NFCeHub` (`App.Title`), que tem de ser igual ao `Title` da `MainWindow.xaml`.
 - Log de erros em `%LOCALAPPDATA%\NFCeHub\nfcehub.log` (até 1 MB, 2 cópias antigas). Erros não tratados na janela vão para o log e aparecem numa mensagem, sem fechar o programa.
 - Caixas de mensagem: o programa não usa a caixa padrão do Windows. `MessageDialog` é uma janela própria no tema (claro/escuro), com um selo redondo colorido conforme o tipo (pergunta e informação em azul, sucesso em verde, aviso em amarelo, erro em vermelho), título, subtítulo, uma faixa em degradê e os botões em pílula. Enter aciona o botão principal e Esc fecha (equivale a cancelar). Avisos tocam o som de exclamação do Windows e erros, o som de erro. `Dialogs.cs` monta o conteúdo de cada caso:
-  - Importar PDF: destaques com o total de NFC-e, de faixas e de séries; tabela por série (intervalo de números e quantidade); as 12 primeiras faixas em etiquetas (com a série na frente quando há mais de uma); avisos de NF-e ignoradas e de leitura. Botões "Cancelar" e "Adicionar à lista".
+  - Importar Documento: destaques com o total de NFC-e, de faixas e de séries; tabela por série (intervalo de números e quantidade); as 12 primeiras faixas em etiquetas (com a série na frente quando há mais de uma); avisos de NF-e ignoradas e de leitura. Botões "Cancelar" e "Adicionar à lista".
   - Arquivo sem NFC-e: explica os formatos aceitos e mostra os avisos da leitura.
   - Fim da exportação: um destaque colorido por situação que apareceu (autorizadas em verde, canceladas em azul, sem autorização em amarelo, não encontradas e com erro em vermelho), a pasta de destino e o nome do relatório, quando houver. O selo é verde se tudo foi exportado e amarelo se houve problema ou interrupção. Botões "Fechar" e "Abrir pasta".
   - Erro inesperado: mensagem de erro no mesmo visual. Se a própria caixa falhar, cai na caixa padrão do Windows.

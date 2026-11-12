@@ -16,7 +16,7 @@ O próprio SysPDV tem uma rotina para exportar os XMLs, mas ela é lenta, pouco 
 O NFCeHub resolve isso em uma única tela:
 
 - **Várias faixas de uma vez:** uma nota, um intervalo como "122 a 150" ou vários intervalos, de uma ou mais séries, no mesmo pedido.
-- **Importação da relação de notas:** a lista pode vir de um arquivo PDF, TXT ou CSV, sem digitar número por número.
+- **Importação da relação de notas:** a lista pode vir de um arquivo PDF, Word (`.doc`, `.docx`, `.rtf`), TXT ou CSV, sem digitar número por número.
 - **Resultado organizado:** com mais de uma série, os XMLs são separados em uma pasta por série; as notas que não puderam ser exportadas ficam em um relatório na pasta de destino.
 - **Mais rápido:** os XMLs são lidos direto do banco de dados, sem passar pelas telas do SysPDV.
 
@@ -25,8 +25,8 @@ Basta informar as notas, escolher a pasta de destino e clicar em **Gerar XMLs**.
 <table>
   <tr>
     <td width="50%" valign="top" align="center">
-      <img src="docs/img/import.png" alt="Conferência das notas importadas de um PDF"><br>
-      <sub>Conferência das notas lidas de um PDF</sub>
+      <img src="docs/img/import.png" alt="Conferência das notas importadas de um documento"><br>
+      <sub>Conferência das notas lidas de um documento</sub>
     </td>
     <td width="50%" valign="top" align="center">
       <img src="docs/img/export.png" alt="Resumo do fim da exportação"><br>
@@ -68,8 +68,12 @@ NFCeHub/
 │   │   │   ├── ExportResults.cs     situações das notas e resumo da exportação
 │   │   │   └── ExportReport.cs      relatório das notas sem XML autorizado
 │   │   ├── Import/
-│   │   │   ├── ListReader.cs        acha as notas no texto de um PDF/TXT/CSV
-│   │   │   ├── DocumentText.cs      extrai o texto do PDF ou do arquivo de texto
+│   │   │   ├── ListReader.cs        acha as notas no texto extraído do arquivo
+│   │   │   ├── DocumentText.cs      reconhece o formato pelo conteúdo e extrai o texto
+│   │   │   ├── RtfText.cs           texto de RTF (inclusive .doc que é RTF por dentro)
+│   │   │   ├── DocxText.cs          texto de .docx
+│   │   │   ├── WordBinaryText.cs    texto de .doc do Word 97-2003
+│   │   │   ├── CompoundFile.cs      leitura do arquivo composto (OLE) do .doc
 │   │   │   └── Reading.cs           resultado da leitura
 │   │   ├── NoteRange.cs             faixas de série e número
 │   │   └── Log.cs                   arquivo de log
@@ -161,4 +165,4 @@ src\NFCeHub.Cli\bin\Release\net48\nfcehub-cli.exe --series 1 --start 109370 --en
 src\NFCeHub.Cli\bin\Release\net48\nfcehub-cli.exe --list relatorio.pdf --output C:\temp\xml --by-month
 ```
 
-Opções: `--config`, `--series`, `--start`, `--end`, `--list` (PDF/TXT/CSV), `--output`, `--no-cancellation`, `--include-unauthorized`, `--by-month` e `--print-text` (mostra o texto extraído de um PDF, para ajustar a leitura de um formato novo).
+Opções: `--config`, `--series`, `--start`, `--end`, `--list` (PDF/Word/TXT/CSV), `--output`, `--no-cancellation`, `--include-unauthorized`, `--by-month` e `--print-text` (mostra o texto extraído de um arquivo, para ajustar a leitura de um formato novo).

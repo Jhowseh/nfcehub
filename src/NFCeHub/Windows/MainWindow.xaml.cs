@@ -241,7 +241,7 @@ public partial class MainWindow : Window
         var dialog = new OpenFileDialog
         {
             Title = "Arquivo com a relação das NFC-e",
-            Filter = "PDF ou texto|*.pdf;*.txt;*.csv|PDF|*.pdf|Texto|*.txt;*.csv|Todos os arquivos|*.*",
+            Filter = "Documentos (PDF, Word, texto)|*.pdf;*.doc;*.docx;*.rtf;*.txt;*.csv;*.htm;*.html|PDF|*.pdf|Word|*.doc;*.docx;*.rtf|Texto|*.txt;*.csv|Todos os arquivos|*.*",
         };
         if (dialog.ShowDialog(this) != true)
         {
@@ -441,7 +441,7 @@ public partial class MainWindow : Window
         }
         if (ranges.Count == 0)
         {
-            Message("Informe a série e o número das NFC-e (ou importe um PDF).", "Yellow");
+            Message("Informe a série e o número das NFC-e (ou importe um documento).", "Yellow");
             StartField.Focus();
             return;
         }

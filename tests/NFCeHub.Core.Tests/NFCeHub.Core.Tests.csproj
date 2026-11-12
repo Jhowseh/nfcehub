@@ -12,6 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+    <None Include="Samples\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\NFCeHub.Core\NFCeHub.Core.csproj" />
   </ItemGroup>
 

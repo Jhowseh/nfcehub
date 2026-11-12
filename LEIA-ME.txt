@@ -16,8 +16,6 @@ PRIMEIRO USO
 ------------
 1. Copie o NFCeHub.exe para uma pasta do computador servidor
    (ex.: C:\NFCeHub). O config.ini será criado nessa mesma pasta.
-   Se já usava a versão antiga (XML-NFCe-SysPDV.exe), copie o config.ini
-   dela para a mesma pasta do NFCeHub.exe e apague o programa antigo.
 2. Abra o programa. Na primeira vez abre a tela de Configurações:
    o servidor e o banco já vêm preenchidos com os do SysPDV.
    Digite a senha do banco, clique em "Testar conexão" e depois em "Salvar".
@@ -28,13 +26,15 @@ COMO USAR
 1. Em "Selecionar notas", digite a série, o nº inicial e o nº final e clique em +.
    - Uma nota só: deixe o nº final em branco.
    - Pode adicionar várias faixas (ex.: 122 a 150 e depois 160 a 170).
-2. Ou clique em "Importar PDF" e escolha um PDF (ou TXT/CSV) com a relação
-   das notas. O programa reconhece:
+2. Ou clique em "Importar Documento" e escolha um PDF, Word (.doc, .docx,
+   .rtf), TXT ou CSV com a relação das notas. O programa reconhece:
    - chaves de acesso (44 dígitos) – o jeito mais seguro;
    - tabelas com colunas Inicial / Final / Série (ex.: relatório de "Notas
      não lançadas de Saídas" do sistema do contador) ou Série / Número;
      linhas de NF-e (modelo 55) são ignoradas;
-   - faixas escritas, como "122 a 150" ou "Inicial 122 Final 150";
+   - "Análise de Sequência de Notas" da Alterdata, com várias séries;
+   - faixas escritas, como "122 a 150", "122 / 150" ou
+     "Inicial 122 Final 150";
    - números soltos (usa a série digitada na tela).
    Antes de adicionar à lista, ele mostra o que encontrou para você conferir.
 3. Em "Onde salvar", escolha a pasta.
@@ -73,7 +73,7 @@ computador: nem no banco, nem na pasta C:\Syspdv\NFCe\Vendas.
 
 A nota está autorizada na SEFAZ, mas o programa não gera o XML dela,
 porque o contador recusaria o arquivo. Ela aparece no relatório de notas
-não exportadas. Para conseguir o XML correto, procure o suporte do SysPDV.
+não exportadas.
 
 
 ONDE O SYSPDV GUARDA OS XMLs (para suporte)

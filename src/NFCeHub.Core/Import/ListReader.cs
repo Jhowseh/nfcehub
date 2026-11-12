@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -34,11 +35,13 @@ public static class ListReader
         new(@"pag(?:ina)?\.?:?\s*\d+\s*(?:de|/)\s*\d+"),
         new(@"(?<![\d/])\d{1,3}\s*/\s*\d{1,3}(?![\d/])"),
         new(@"\d{20,}"),
+        new(@"\(\s*\d+\s*\)"),
     };
     private static readonly Regex Thousands = new(@"(?<![\d.,])(\d{1,3}(?:\.\d{3})+)(?![\d.,])");
-    private static readonly Regex SeriesRegex = new(@"\bserie\s*(?:n[o.]?\s*)?[:=\-]?\s*(\d{1,3})\b");
+    private static readonly Regex SeriesRegex = new(@"\bserie(?:\s+d[aeo]s?\s+[a-z\-]+)?\s*(?:n[o.]?\s*)?[:=\-]?\s*0*(\d{1,3})\b");
+    private static readonly Regex ModelRegex = new(@"\bmod(?:elo)?\.?(?:\s+d[aeo]s?\s+[a-z\-]+)?\s*[:=\-]?\s*(55|65)\b");
     private static readonly Regex StartEnd = new(@"inicial\D{0,20}?(\d{1,9})\D{0,40}?final\D{0,20}?(\d{1,9})");
-    private static readonly Regex RangeRegex = new(Before + @"(\d{1,9})\s*(?:a|ate|-|–|—|\.\.)\s*(\d{1,9})" + After);
+    private static readonly Regex RangeRegex = new(Before + @"(\d{1,9})\s*(?:a|ate|-|–|—|\.\.|/)\s*(\d{1,9})" + After);
     private static readonly Regex Integer = new(Before + @"(\d{1,9})" + After);
     private static readonly Regex Skip = new(@"\b(total|totais|quantidade|qtde?|soma|cnpj|cpf|inscricao|telefone|fone|cep)\b");
     private static readonly Regex Nfe = new(@"\bnf-?e\b|\bmod(?:elo)?\.?\s*55\b");
@@ -63,8 +66,9 @@ public static class ListReader
 
     public static Reading ReadFile(string path, int defaultSeries = 1)
     {
-        var reading = Extract(DocumentText.Read(path), defaultSeries);
-        if (reading.Ranges.Count == 0 && DocumentText.IsPdf(path))
+        var data = File.ReadAllBytes(path);
+        var reading = Extract(DocumentText.Read(data), defaultSeries);
+        if (reading.Ranges.Count == 0 && DocumentText.IsPdf(data))
         {
             reading.Warnings.Add("Se o PDF for uma imagem escaneada, não há texto para ler.");
         }
@@ -83,8 +87,8 @@ public static class ListReader
         Reading reading;
         if (lines.Any(l => HeaderColumns(l) != null))
         {
-            var (ranges, tableNfe) = FromTable(lines, defaultSeries);
-            reading = new Reading(ranges, ranges.Count > 0 ? ReadingSource.Table : ReadingSource.None, nfeCount + tableNfe);
+            var (ranges, warnings, tableNfe) = FromTable(lines, defaultSeries);
+            reading = new Reading(ranges, ranges.Count > 0 ? ReadingSource.Table : ReadingSource.None, nfeCount + tableNfe, warnings);
         }
         else
         {
@@ -239,14 +243,17 @@ public static class ListReader
         return RowKind.Nfce;
     }
 
-    private static (List<NoteRange>, int) FromTable(List<string> lines, int defaultSeries)
+    private static (List<NoteRange>, List<string>, int) FromTable(List<string> lines, int defaultSeries)
     {
         var ranges = new List<NoteRange>();
+        var warnings = new List<string>();
         var nfeCount = 0;
         List<ListColumn> columns = null;
         var series = defaultSeries;
-        foreach (var line in lines)
+        var model = 65;
+        foreach (var original in lines)
         {
+            var line = original;
             if (line.Trim().Length == 0)
             {
                 continue;
@@ -257,11 +264,19 @@ public static class ListReader
                 columns = newColumns;
                 continue;
             }
-            if (columns == null || Skip.IsMatch(line))
+            if (Skip.IsMatch(line) || ReadModel(line, ref model))
             {
                 continue;
             }
-            if (Nfe.IsMatch(line) && !Nfce.IsMatch(line))
+            if (columns == null || !columns.Contains(ListColumn.Series))
+            {
+                line = ReadSeries(line, ref series);
+            }
+            if (columns == null)
+            {
+                continue;
+            }
+            if ((Nfe.IsMatch(line) && !Nfce.IsMatch(line)) || (model == 55 && !columns.Contains(ListColumn.Model)))
             {
                 if (Integer.IsMatch(line))
                 {
@@ -269,10 +284,9 @@ public static class ListReader
                 }
                 continue;
             }
-            var m = SeriesRegex.Match(line);
-            if (m.Success && !columns.Contains(ListColumn.Series))
+            if (columns.Count == 1 && columns[0] == ListColumn.Number && ReadRanges(line, series, ranges, warnings))
             {
-                series = int.Parse(m.Groups[1].Value);
+                continue;
             }
             switch (TableRow(Integers(line), columns, series, out var range))
             {
@@ -284,7 +298,7 @@ public static class ListReader
                     break;
             }
         }
-        return (Ranges.Merge(ranges), nfeCount);
+        return (Ranges.Merge(ranges), warnings, nfeCount);
     }
 
     private static (List<NoteRange>, List<string>, int) FromFreeText(List<string> lines, int defaultSeries)
@@ -293,56 +307,80 @@ public static class ListReader
         var warnings = new List<string>();
         var nfeCount = 0;
         var series = defaultSeries;
+        var model = 65;
         foreach (var original in lines)
         {
             var line = original;
-            if (line.Trim().Length == 0 || !AnyDigit.IsMatch(line) || Skip.IsMatch(line))
+            if (line.Trim().Length == 0 || !AnyDigit.IsMatch(line) || Skip.IsMatch(line) || ReadModel(line, ref model))
             {
                 continue;
             }
-            if (Nfe.IsMatch(line) && !Nfce.IsMatch(line))
+            if ((Nfe.IsMatch(line) && !Nfce.IsMatch(line)) || model == 55)
             {
                 nfeCount++;
                 continue;
             }
-            var sm = SeriesRegex.Match(line);
-            if (sm.Success)
-            {
-                series = int.Parse(sm.Groups[1].Value);
-                line = line.Substring(0, sm.Index) + " " + line.Substring(sm.Index + sm.Length);
-            }
-
-            var matched = false;
-            foreach (var regex in new[] { StartEnd, RangeRegex })
-            {
-                foreach (Match m in regex.Matches(line))
-                {
-                    var start = long.Parse(m.Groups[1].Value);
-                    var end = long.Parse(m.Groups[2].Value);
-                    if (end < start)
-                    {
-                        continue;
-                    }
-                    if (end - start >= MaxRange)
-                    {
-                        warnings.Add($"Faixa {start} a {end} ignorada (grande demais).");
-                        matched = true;
-                        continue;
-                    }
-                    ranges.Add(new NoteRange(series, start, end));
-                    matched = true;
-                }
-                if (matched)
-                {
-                    break;
-                }
-            }
-            if (matched)
+            line = ReadSeries(line, ref series);
+            if (ReadRanges(line, series, ranges, warnings))
             {
                 continue;
             }
             ranges.AddRange(Integers(line).Select(n => new NoteRange(series, n, n)));
         }
         return (Ranges.Merge(ranges), warnings, nfeCount);
+    }
+
+    private static bool ReadModel(string line, ref int model)
+    {
+        var m = ModelRegex.Match(line);
+        if (!m.Success || Integer.IsMatch(Remove(line, m)))
+        {
+            return false;
+        }
+        model = int.Parse(m.Groups[1].Value);
+        return true;
+    }
+
+    private static string ReadSeries(string line, ref int series)
+    {
+        var m = SeriesRegex.Match(line);
+        if (!m.Success)
+        {
+            return line;
+        }
+        series = int.Parse(m.Groups[1].Value);
+        return Remove(line, m);
+    }
+
+    private static string Remove(string line, Match m) =>
+        line.Substring(0, m.Index) + " " + line.Substring(m.Index + m.Length);
+
+    private static bool ReadRanges(string line, int series, List<NoteRange> ranges, List<string> warnings)
+    {
+        foreach (var regex in new[] { StartEnd, RangeRegex })
+        {
+            var matched = false;
+            foreach (Match m in regex.Matches(line))
+            {
+                var start = long.Parse(m.Groups[1].Value);
+                var end = long.Parse(m.Groups[2].Value);
+                if (end < start)
+                {
+                    continue;
+                }
+                matched = true;
+                if (end - start >= MaxRange)
+                {
+                    warnings.Add($"Faixa {start} a {end} ignorada (grande demais).");
+                    continue;
+                }
+                ranges.Add(new NoteRange(series, start, end));
+            }
+            if (matched)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -174,12 +174,14 @@ class Manual(FPDF):
         self.multi_cell(width, 5.6, text, markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         self.space(2.5)
 
+    subtitle_height = 8.5
+
     def subtitle(self, text):
         self.ensure_space(16)
         self.set_font("SegoeSB", size=12)
         self.set_text_color(*TEXT)
         self.cell(0, 7, text, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-        self.space(1.5)
+        self.space(self.subtitle_height - 7)
 
     def number_badge(self, x, y, number, d=6.2, color=VIOLET, size=9.5):
         self.set_fill_color(*color)
@@ -216,6 +218,13 @@ class Manual(FPDF):
             self.set_xy(x + 5, y)
             self.multi_cell(width - 5, 5.6, text, markdown=True, align="L", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             self.space(1.6)
+
+    def bullets_height(self, items, x=None, width=None, size=10.5):
+        x = self.l_margin if x is None else x
+        width = width or (self.w - self.r_margin - x)
+        self.set_font("Segoe", size=size)
+        return sum(len(self.multi_cell(width - 5, 5.6, text, markdown=True, align="L", dry_run=True,
+                                       output="LINES")) * 5.6 + 1.6 for text in items)
 
     def table_rows(self, widths, rows, bold_first_column=True, first_column_colors=None, padding=(1.8, 2.6)):
         self.set_font("Segoe", size=9.5)
@@ -272,8 +281,12 @@ class Manual(FPDF):
             self.cell(0, 4, caption, align="C", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         self.space(4)
 
+    @staticmethod
+    def tree_height(entries):
+        return 8 + len(entries) * 8 + 4
+
     def tree(self, entries, name_width=82):
-        height = 8 + len(entries) * 8
+        height = self.tree_height(entries) - 4
         self.ensure_space(height + 4)
         x, y = self.l_margin, self.get_y()
         self.set_fill_color(*CARD)
@@ -374,7 +387,7 @@ def page_intro(pdf):
     pdf.bullets([
         "**Várias faixas de uma vez:** uma nota, um intervalo como \"122 a 150\" ou vários intervalos, de uma ou "
         "mais séries, no mesmo pedido.",
-        "**Importação da relação de notas:** a lista pode vir de um arquivo PDF, TXT ou CSV, sem digitar número "
+        "**Importação da relação de notas:** a lista pode vir de um arquivo PDF, Word, TXT ou CSV, sem digitar número "
         "por número.",
         "**Resultado organizado:** com mais de uma série, cada série vai para a sua pasta, e as notas que não "
         "puderam ser exportadas ficam listadas num relatório.",
@@ -413,12 +426,6 @@ def page_install(pdf):
                 "A configuração é salva no arquivo **config.ini**, na mesma pasta do NFCeHub.exe. Não coloque o "
                 "programa em C:\\Program Files: sem permissão de administrador, a configuração não é salva.",
                 "warning")
-    pdf.subtitle("Já usava a versão antiga (XML-NFCe-SysPDV.exe)?")
-    pdf.bullets([
-        "Copie o **config.ini** da versão antiga para a mesma pasta do NFCeHub.exe. Assim não precisa "
-        "configurar de novo.",
-        "Depois de conferir que o NFCeHub abre e conecta, apague o programa antigo.",
-    ])
     pdf.subtitle("Requisitos")
     pdf.bullets([
         "Windows 7 SP1 ao Windows 11.",
@@ -456,13 +463,13 @@ def page_config(pdf):
 def page_main(pdf):
     pdf.add_page()
     pdf.section(3, "layers", "A tela principal", "Tudo é feito nesta tela.")
-    pdf.figure(TMP / "main.png", pdf.content_width, "Tela principal do NFCeHub (dados fictícios)")
+    pdf.figure(TMP / "main.png", 156, "Tela principal do NFCeHub (dados fictícios)")
     pdf.steps([
         "**Status da conexão**: bolinha verde = conectado ao SysPDV; vermelha = sem conexão. Passe o mouse "
         "sobre ela para ver os detalhes, como a última NFC-e emitida no banco.",
         "**Série, Nº inicial e Nº final**: as notas que você quer. Para uma nota só, deixe o nº final em branco.",
         "**+**: põe a faixa digitada na lista (ou tecle **Enter**).",
-        "**Importar PDF**: lê a relação de notas de um arquivo PDF, TXT ou CSV (Passo 5).",
+        "**Importar Documento**: lê a relação de notas de um PDF, Word, TXT ou CSV (Passo 5).",
         "**Lista de faixas**: o que será exportado, com a quantidade de notas. O **×** tira uma faixa; "
         "**Limpar lista** tira todas.",
         "**Onde salvar**: a pasta onde os XMLs serão gravados. O botão da pasta abre a janela para escolher.",
@@ -505,7 +512,7 @@ def page_import(pdf):
     pdf.section(5, "document", "Importar a relação de notas",
                 "Quando o contador manda a lista das notas que faltam, não precisa digitar uma por uma.")
     pdf.steps([
-        "Clique em **Importar PDF** e escolha o arquivo (PDF, TXT ou CSV).",
+        "Clique em **Importar Documento** e escolha o arquivo (PDF, Word, TXT ou CSV).",
         "Confira o que o programa encontrou: total de NFC-e, notas por série, faixas e avisos.",
         "Clique em **Adicionar à lista**. Depois, é só clicar em **Gerar XMLs**.",
     ])
@@ -516,15 +523,16 @@ def page_import(pdf):
         ("Chaves de acesso", "Os 44 dígitos da chave, juntos ou separados em grupos. É o jeito **mais seguro**: "
                              "a série e o número saem da própria chave, que tem dígito verificador."),
         ("Tabela de notas", "Colunas **Inicial / Final / Série** (como o relatório \"Notas não lançadas de "
-                            "Saídas\" do sistema do contador) ou **Série / Número**."),
-        ("Faixas escritas", "\"122 a 150\", \"122 até 150\", \"122-150\" ou \"Inicial 122 Final 150\"."),
+                            "Saídas\" do sistema do contador), **Série / Número**, ou a \"Análise de Sequência "
+                            "de Notas\" da Alterdata (várias séries no mesmo arquivo)."),
+        ("Faixas escritas", "\"122 a 150\", \"122 até 150\", \"122-150\", \"122 / 150\" ou \"Inicial 122 Final 150\"."),
         ("Números soltos", "Um número por linha ou separados por vírgula. Usa a série digitada na tela, ou a "
                            "série escrita no arquivo (\"Série 2\")."),
     ]
     pdf.table_rows((40, 134), rows)
     pdf.callout("PDF escaneado não funciona",
                 "O programa lê o texto do arquivo. Um PDF que é foto ou digitalização não tem texto para ler. Peça "
-                "ao contador o PDF original ou um arquivo TXT ou CSV, ou digite as faixas na tela. Linhas de "
+                "ao contador o PDF original, o arquivo do Word ou um TXT ou CSV, ou digite as faixas na tela. Linhas de "
                 "**NF-e (modelo 55)** são ignoradas: o programa exporta só NFC-e.", "warning")
 
 
@@ -534,44 +542,41 @@ def page_files(pdf):
     pdf.subtitle("Situação de cada nota")
     rows = [
         ("Situação", "O que significa", "O que é gravado"),
-        ("Autorizada", "NFC-e autorizada pela SEFAZ.", "<chave>-nfe.xml (a nota com o protocolo de autorização)"),
-        ("Cancelada", "NFC-e autorizada e depois cancelada.",
-         "<chave>-nfe.xml e o evento de cancelamento, 110111<chave>01-procEventoNFe.xml"),
-        ("Sem autorização", "Rejeitada ou em contingência ainda não transmitida.",
-         "Nada (ou na subpasta **Sem autorizacao**, se a opção estiver marcada)"),
-        ("Não encontrada", "O número não existe no banco desta série.", "Nada"),
+        ("Autorizada", "NFC-e autorizada pela SEFAZ.", "<chave>-nfe.xml"),
+        ("Cancelada", "Autorizada e depois cancelada.", "A nota e o evento de cancelamento"),
+        ("Sem autorização", "Rejeitada ou não transmitida.", "Nada (ou subpasta **Sem autorizacao**)"),
+        ("Não encontrada", "Número não existe no banco.", "Nada"),
         ("Com erro", "Não foi possível ler a nota.", "Nada"),
     ]
     pdf.table_rows((32, 64, 78), rows, first_column_colors=[GREEN, LINK, YELLOW, RED, RED])
     pdf.subtitle("Opções")
     rows = [
         ("Opção", "O que faz"),
-        ("Incluir XML do cancelamento", "Grava também o evento de cancelamento das notas canceladas. Vem marcada."),
-        ("Separar em pastas por mês", "Cria uma subpasta por mês de emissão, como **2026-10**. A nota e o seu "
-                                      "cancelamento ficam sempre juntos."),
-        ("Incluir notas sem autorização", "Grava também os XMLs sem protocolo na subpasta **Sem autorizacao**. "
-                                          "Eles não valem para a contabilidade: use só para conferência."),
+        ("Incluir XML do cancelamento", "Grava o evento de cancelamento das canceladas. Vem marcada."),
+        ("Separar em pastas por mês", "Uma subpasta por mês de emissão, como **2026-10**."),
+        ("Incluir notas sem autorização", "Grava os XMLs sem protocolo na subpasta **Sem autorizacao**. Não "
+                                          "valem para a contabilidade: use só para conferência."),
     ]
     pdf.table_rows((58, 116), rows)
-    pdf.subtitle("Exemplo: duas séries, separando por mês")
-    pdf.tree([
+    entries = [
         (0, "folder", "C:\\XML-Contabilidade\\Outubro-2026", ""),
         (1, "folder", "Série 1", ""),
         (2, "folder", "2026-10", ""),
         (3, "xml", "2526102723...-nfe.xml", "um arquivo por nota"),
         (1, "folder", "Série 2", "mesma organização"),
-        (1, "document", "Relatorio-NFCe-nao-exportadas-...txt", "só se faltou alguma nota"),
-    ], name_width=100)
-    pdf.bullets([
+        (1, "document", "Relatorio-NFCe-nao-exportadas-...txt", "notas que não foram exportadas"),
+    ]
+    notes = [
         "Com uma série só, não é criada a pasta **Série**: os XMLs ficam direto na pasta escolhida.",
-        "Se alguma nota não for encontrada, não tiver autorização ou der erro, o programa grava o relatório "
-        "**Relatorio-NFCe-nao-exportadas-data-hora.txt** na pasta de destino, com a lista dessas notas. Ele "
-        "abre no Bloco de Notas e no Excel.",
-    ])
+    ]
+    pdf.ensure_space(pdf.subtitle_height + pdf.tree_height(entries) + pdf.bullets_height(notes))
+    pdf.subtitle("Exemplo: duas séries, separando por mês")
+    pdf.tree(entries, name_width=100)
+    pdf.bullets(notes)
 
 
 def page_contingency(pdf):
-    pdf.space(6)
+    pdf.add_page()
     pdf.section("BOM SABER", "alert", "Nota autorizada que aparece como \"sem autorização\"")
     pdf.paragraph(
         "Algumas NFC-e que estão autorizadas no SysPDV aparecem como **sem autorização**, com o detalhe "
@@ -587,10 +592,7 @@ def page_contingency(pdf):
     pdf.paragraph(
         "A nota autorizada de verdade não fica guardada no computador: nem no banco, nem na pasta "
         "**C:\\Syspdv\\NFCe\\Vendas**. Por isso o NFCeHub não gera o XML dessa nota (o contador recusaria o "
-        "arquivo) e ela aparece no relatório de notas não exportadas.")
-    pdf.callout("O que fazer",
-                "A nota está autorizada na SEFAZ. Para conseguir o XML correto, procure o **suporte do SysPDV** "
-                "informando a série e o número que aparecem no relatório.", "warning")
+        "arquivo). Ela continua autorizada na SEFAZ e aparece no relatório de notas não exportadas.")
 
 
 def page_faq(pdf):
@@ -610,8 +612,8 @@ def page_faq(pdf):
          "A nota foi rejeitada ou está em contingência sem transmitir. Transmita pelo SysPDV e gere de novo. "
          "Se o detalhe for \"AUTORIZADO O USO DA NF-E\", veja a página anterior."),
         ("\"Nenhuma NFC-e encontrada\" ao importar",
-         "O arquivo não tem texto (PDF escaneado) ou está em outro formato. Peça o PDF original, um TXT ou "
-         "um CSV, ou digite as faixas."),
+         "O arquivo não tem texto (PDF escaneado) ou está em outro formato. Peça o PDF original, o arquivo do "
+         "Word, um TXT ou um CSV, ou digite as faixas."),
         ("\"Não foi possível gravar config.ini\"",
          "A pasta do programa não permite gravar (por exemplo, C:\\Program Files). Mova o NFCeHub.exe para "
          "uma pasta como C:\\NFCeHub."),

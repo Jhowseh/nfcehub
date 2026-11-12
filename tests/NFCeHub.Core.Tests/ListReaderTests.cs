@@ -95,6 +95,57 @@ public class ListReaderTests
     }
 
     [Fact]
+    public void ReadsAlterdataSequenceAnalysisWithSeveralSeries()
+    {
+        var text = string.Join("\n",
+            "\t( 00785)\tEMPRESA EXEMPLO\tAlterdata Software",
+            "\tEmissão:\t11/11/2026 16:49:32",
+            "\tAnálise de Sequência de Notas\t01/07/2026\taté\t31/10/2026\tPágina 1 de 2",
+            "",
+            "\tModelo da Nota:\t65",
+            "\tSérie da Nota:\t00005",
+            "\tNúmero(s) não lançado(s):",
+            "\t024681",
+            "\t024684 / 024688",
+            "",
+            "\tSérie da Nota:\t00002",
+            "\tNúmero(s) não lançado(s):",
+            "",
+            "\t032325",
+            "\t( 00785)\tEMPRESA EXEMPLO\tAlterdata Software",
+            "\tAnálise de Sequência de Notas\t01/07/2026\taté\t31/10/2026\tPágina 2 de 2",
+            "\tModelo da Nota:\t65",
+            "\tSérie da Nota:\t00002",
+            "\tNúmero(s) não lançado(s):",
+            "\t033124 / 033128",
+            "",
+            "\tModelo da Nota:\t55",
+            "\tSérie da Nota:\t00001",
+            "\tNúmero(s) não lançado(s):",
+            "\t000150 / 000152");
+
+        var reading = ListReader.Extract(text, defaultSeries: 3);
+
+        Assert.Equal(ReadingSource.Table, reading.Source);
+        Assert.Equal(new[]
+        {
+            new NoteRange(2, 32325, 32325),
+            new NoteRange(2, 33124, 33128),
+            new NoteRange(5, 24681, 24681),
+            new NoteRange(5, 24684, 24688),
+        }, reading.Ranges);
+        Assert.Equal(1, reading.NfeCount);
+    }
+
+    [Fact]
+    public void ReadsSlashRangesInFreeText()
+    {
+        var reading = ListReader.Extract("Série 4\n1500 / 1510", defaultSeries: 1);
+
+        Assert.Equal(new[] { new NoteRange(4, 1500, 1510) }, reading.Ranges);
+    }
+
+    [Fact]
     public void HeaderPrefersStartAndEndOverNumber()
     {
         Assert.Equal(new[] { ListColumn.Start, ListColumn.End, ListColumn.Series },
